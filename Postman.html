@@ -1194,6 +1194,7 @@
       background: var(--border-color);
       border-radius: 4px;
     }
+
     /* cURL Action Buttons */
     .btn-curl-import {
       background: linear-gradient(135deg, #0284c7, #2563eb);
@@ -1500,9 +1501,9 @@
           <!-- URL Bar Section -->
           <div class="field-section">
             <div class="field-header">
-              <span class="field-title">
+              <!-- <span class="field-title">
                 🌐 Request Endpoint
-              </span>
+              </span> -->
               <div style="display: flex; align-items: center; gap: 8px;">
                 <button type="button" class="btn-new-req" id="btnQuickNew" title="Start new blank request (Alt+N)">
                   ✨ Add New Request
@@ -1510,7 +1511,8 @@
                 <button type="button" class="btn-curl-import" id="btnOpenCurlModal" title="Import cURL command (Alt+I)">
                   📥 Import cURL
                 </button>
-                <button type="button" class="btn-curl-copy" id="btnCopyAsCurl" title="Copy current request as executable cURL (Alt+C)">
+                <button type="button" class="btn-curl-copy" id="btnCopyAsCurl"
+                  title="Copy current request as executable cURL (Alt+C)">
                   📋 Copy cURL
                 </button>
                 <!-- Recent URLs Dropdown -->
@@ -1658,7 +1660,8 @@ space-id: 16658"></textarea>
 
       <div class="modal-body">
         <div class="modal-tip">
-          Paste a <code>curl</code> command copied from Chrome/Firefox DevTools, Postman, terminal, Swagger, or API documentation.
+          Paste a <code>curl</code> command copied from Chrome/Firefox DevTools, Postman, terminal, Swagger, or API
+          documentation.
         </div>
 
         <div class="curl-presets-row">
@@ -1677,7 +1680,8 @@ space-id: 16658"></textarea>
         <div class="curl-preview-container" id="curlPreviewContainer">
           <div class="curl-preview-header">
             <span>Live Parsing Preview</span>
-            <span id="curlStatusBadge" style="font-size: 10px; color: var(--accent-success); font-weight: 600;">● Ready</span>
+            <span id="curlStatusBadge" style="font-size: 10px; color: var(--accent-success); font-weight: 600;">●
+              Ready</span>
           </div>
           <div class="curl-preview-meta">
             <span class="curl-preview-badge" id="prevMethodBadge">METHOD: POST</span>
@@ -1692,7 +1696,8 @@ space-id: 16658"></textarea>
         <button type="button" class="btn-sm" id="btnClearCurlInput">Clear</button>
         <div style="display: flex; gap: 8px;">
           <button type="button" class="btn-sm" id="btnCancelCurlModal">Cancel</button>
-          <button type="button" class="btn-curl-import" id="btnApplyCurlImport" style="padding: 6px 16px; font-size: 12px;">
+          <button type="button" class="btn-curl-import" id="btnApplyCurlImport"
+            style="padding: 6px 16px; font-size: 12px;">
             ✨ Import Request
           </button>
         </div>
@@ -2780,8 +2785,8 @@ space-id: 16658"></textarea>
 
       // Normalize line continuations (\ or ` or ^) followed by optional whitespace and newlines
       text = text.replace(/\\\r?\n/g, ' ')
-                 .replace(/`\r?\n/g, ' ')
-                 .replace(/\^\r?\n/g, ' ');
+        .replace(/`\r?\n/g, ' ')
+        .replace(/\^\r?\n/g, ' ');
 
       // Tokenize the command respecting single quotes, double quotes, and escape characters
       const tokens = [];
@@ -2862,9 +2867,9 @@ space-id: 16658"></textarea>
           headers.push(token.substring(2));
         }
         // Data / Body flags
-        else if (token === "-d" || token === "--data" || token === "--data-raw" || 
-                 token === "--data-binary" || token === "--data-ascii" || 
-                 token === "--data-urlencode" || token === "--json") {
+        else if (token === "-d" || token === "--data" || token === "--data-raw" ||
+          token === "--data-binary" || token === "--data-ascii" ||
+          token === "--data-urlencode" || token === "--json") {
           if (nextToken) bodyChunks.push(nextToken);
           i++;
         } else if (token.startsWith("-d") && token.length > 2) {
@@ -3047,10 +3052,10 @@ space-id: 16658"></textarea>
         curlStatusBadge.textContent = "● Ready to import";
         curlStatusBadge.style.color = "var(--accent-success)";
         prevMethodBadge.textContent = `METHOD: ${parsed.method}`;
-        
+
         const headerCount = parsed.headers ? parsed.headers.split("\n").filter(Boolean).length : 0;
         prevHeadersBadge.textContent = `${headerCount} HEADER${headerCount === 1 ? '' : 'S'}`;
-        
+
         prevPayloadBadge.textContent = parsed.payload ? "HAS BODY" : "NO BODY";
         prevUrlText.textContent = parsed.url;
       }
