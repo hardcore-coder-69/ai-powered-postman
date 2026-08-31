@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Postman: AI Powered</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Automatically load external system data file -->
+  <script src="./postman_data.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --bg-input: #0f172a;
+      --bg-hover: #334155;
+      --border-color: #334155;
+      --border-focus: #3b82f6;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-primary: #3b82f6;
+      --accent-primary-hover: #2563eb;
+      --accent-success: #10b981;
+      --accent-danger: #ef4444;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f1f5f9;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f8fafc;
+      --bg-hover: #e2e8f0;
+      --border-color: #cbd5e1;
+      --border-focus: #2563eb;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent-primary: #2563eb;
+      --accent-primary-hover: #1d4ed8;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    /* Top Navbar */
+    .app-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .brand h1 {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Main Layout */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      flex: 1;
+      height: calc(100vh - 53px);
+      overflow: hidden;
+      transition: grid-template-columns 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .app-layout.sidebar-collapsed {
+      grid-template-columns: 0px 1fr;
+    }
+
+    @media (max-width: 1024px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+
+      .app-layout.sidebar-collapsed {
+        grid-template-columns: 1fr;
+      }
+
+      .app-layout.sidebar-collapsed .sidebar {
+        display: none;
+      }
+    }
+
+    /* Sidebar for History */
+    .sidebar {
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      min-width: 230px;
+      transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.22s ease;
+    }
+
+    .app-layout.sidebar-collapsed .sidebar {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateX(-100%);
+      border-right: none;
+    }
+
+    .btn-sidebar-peek {
+      position: fixed;
+      left: 0;
+      top: 110px;
+      z-index: 9999;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: none;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 8px 10px;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      display: none;
+      box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.45);
+      transition: all 0.15s ease;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+    }
+
+    .btn-sidebar-peek:hover {
+      color: white;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      padding-right: 13px;
+    }
+
+    .app-layout.sidebar-collapsed .btn-sidebar-peek {
+      display: inline-flex;
+    }
+
+    .sidebar-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-primary);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar-search {
+      margin-bottom: 6px;
+      position: relative;
+    }
+
+    .sidebar-search input {
+      width: 100%;
+      padding: 6px 10px 6px 28px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 11px;
+      outline: none;
+    }
+
+    .sidebar-search svg {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      color: var(--text-muted);
+    }
+
+    .history-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .history-card:hover {
+      border-color: var(--border-focus);
+      transform: translateY(-1px);
+    }
+
+    .history-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .method-tag {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    .method-POST {
+      background: #ea580c;
+      color: white;
+    }
+
+    .method-GET {
+      background: #059669;
+      color: white;
+    }
+
+    .method-PUT {
+      background: #2563eb;
+      color: white;
+    }
+
+    .method-PATCH {
+      background: #7c3aed;
+      color: white;
+    }
+
+    .method-DELETE {
+      background: #dc2626;
+      color: white;
+    }
+
+    .status-badge {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 8px;
+    }
+
+    .status-2xx {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .status-4xx {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+
+    .status-5xx {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .status-err {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+
+    .history-url {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .history-actions {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      display: none;
+    }
+
+    .history-card:hover .history-actions {
+      display: block;
+    }
+
+    .btn-icon-mini {
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      color: var(--text-secondary);
+      border-radius: 3px;
+      padding: 1px 4px;
+      cursor: pointer;
+      font-size: 9px;
+    }
+
+    .btn-icon-mini:hover {
+      color: white;
+      background: var(--accent-danger);
+    }
+
+    /* Main Workspace */
+    .workspace {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 0;
+      padding: 16px;
+      height: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+      height: 100%;
+      min-width: 260px;
+      box-sizing: border-box;
+    }
+
+    #requestPanel {
+      flex: 1 1 54%;
+    }
+
+    #responsePanel {
+      flex: 1 1 46%;
+      padding: 14px 16px;
+      gap: 10px;
+    }
+
+    /* Resizer Divider Bar between Panels */
+    .resizer-divider {
+      width: 14px;
+      margin: 0 4px;
+      cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      user-select: none;
+      z-index: 10;
+      border-radius: 4px;
+      transition: background 0.15s ease;
+    }
+
+    .resizer-divider::after {
+      content: '';
+      width: 4px;
+      height: 40px;
+      background: var(--border-color);
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .resizer-divider:hover::after,
+    .resizer-divider.dragging::after {
+      background: var(--accent-primary);
+      height: 64px;
+      width: 4px;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    }
+
+    .resizer-divider:hover,
+    .resizer-divider.dragging {
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    @media (max-width: 900px) {
+      .workspace {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+        gap: 16px;
+      }
+
+      #requestPanel,
+      #responsePanel {
+        flex: none !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+      }
+
+      .resizer-divider {
+        display: none !important;
+      }
+    }
+
+    /* Form Container with clean spacing between fields */
+    #requestForm {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* URL Bar Row */
+    .url-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      margin-top: 4px;
+    }
+
+    .method-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 13px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      min-width: 95px;
+      outline: none;
+    }
+
+    .url-input-container {
+      flex: 1;
+      position: relative;
+    }
+
+    .url-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .url-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-send {
+      height: 42px;
+      padding: 0 22px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-send:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-send:disabled {
+      background: var(--bg-hover);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Field Sections with ample breathing room */
+    .field-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .field-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Recents Dropdown Buttons */
+    .smart-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .btn-recents {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--accent-primary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-recents:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-primary);
+    }
+
+    .btn-new-req {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 11px;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .btn-new-req:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.45);
+    }
+
+    .btn-new-req:active {
+      transform: translateY(0);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      width: 380px;
+      max-height: 380px;
+      overflow-y: auto;
+      z-index: 200;
+      padding: 6px;
+      display: none;
+      animation: fadeIn 0.15s ease;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dropdown-header {
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dropdown-item {
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: background 0.1s;
+      position: relative;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .dropdown-item-preview {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 48px;
+      line-height: 1.4;
+    }
+
+    .dropdown-item-actions {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      display: none;
+    }
+
+    .dropdown-item:hover .dropdown-item-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dropdown-empty {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* Textareas */
+    textarea.code-editor {
+      width: 100%;
+      min-height: 135px;
+      padding: 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea.code-editor:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Response View */
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .response-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .meta-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    .btn-sm {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-sm:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .btn-new {
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: #ffffff;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-new:hover {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-new:active {
+      transform: translateY(0);
+    }
+
+    .response-body-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    pre.response-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      flex: 1;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 200px;
+      resize: vertical;
+    }
+
+    [data-theme="light"] pre.response-output {
+      color: #1e293b;
+    }
+
+    pre.response-output.error {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.05);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    pre.response-output.empty {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-style: italic;
+    }
+
+    /* Response Syntax Highlighting Styles */
+    .res-meta-line {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--border-color);
+      line-height: 1.4;
+    }
+
+    .res-meta-url-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      line-height: 1.3;
+    }
+
+    .res-meta-status-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.3;
+    }
+
+    .res-meta-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 1px;
+      padding-top: 3px;
+      flex-wrap: wrap;
+    }
+
+    .btn-res-action {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 11px;
+      font-weight: 500;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+      gap: 4px;
+      font-family: var(--font-sans);
+      transition: all 0.15s ease;
+      user-select: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .btn-res-action:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-primary);
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-res-action:active {
+      transform: translateY(0);
+    }
+
+    [data-theme="light"] .btn-res-action {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+
+    [data-theme="light"] .btn-res-action:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: var(--accent-primary);
+    }
+
+    .res-url {
+      color: #38bdf8;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    [data-theme="light"] .res-url {
+      color: #0284c7;
+    }
+
+    .res-duration {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    /* JSON Colors (Dark Mode) */
+    .hl-key {
+      color: #60a5fa;
+      /* Azure Blue for object keys */
+      font-weight: 600;
+    }
+
+    .hl-string {
+      color: #4ade80;
+      /* Fresh Green for string values */
+    }
+
+    .hl-number {
+      color: #fb923c;
+      /* Bright Warm Orange for numbers */
+      font-weight: 600;
+    }
+
+    .hl-boolean {
+      color: #f472b6;
+      /* Vivid Pink for true/false */
+      font-weight: 600;
+    }
+
+    .hl-null {
+      color: #c084fc;
+      /* Purple/Lavender for null */
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .hl-punctuation {
+      color: #94a3b8;
+    }
+
+    /* Collapsible JSON Tree Styles */
+    .json-tree {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: normal;
+      user-select: text;
+    }
+
+    .json-node {
+      display: inline;
+      position: relative;
+    }
+
+    .json-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      margin: 0 1px;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 3px;
+      color: var(--text-muted);
+      vertical-align: middle;
+      transition: all 0.15s ease;
+    }
+
+    .json-toggle:hover {
+      color: var(--accent-primary);
+      background: rgba(59, 130, 246, 0.15);
+    }
+
+    .json-chevron {
+      width: 12px;
+      height: 12px;
+      transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      fill: currentColor;
+    }
+
+    .json-node.collapsed>.json-toggle .json-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .json-node.collapsed>.open-bracket,
+    .json-node.collapsed>.close-bracket,
+    .json-node.collapsed>.json-body {
+      display: none !important;
+    }
+
+    .json-node.collapsed>.json-ellipsis {
+      display: inline-flex !important;
+    }
+
+    .json-body {
+      display: block;
+      padding-left: 18px;
+      margin-left: 5px;
+      border-left: 1px dashed rgba(148, 163, 184, 0.25);
+      transition: border-color 0.15s ease;
+    }
+
+    [data-theme="light"] .json-body {
+      border-left-color: rgba(100, 116, 139, 0.25);
+    }
+
+    .json-node:hover>.json-body {
+      border-left-color: rgba(59, 130, 246, 0.6);
+    }
+
+    .json-row {
+      display: block;
+      position: relative;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .json-ellipsis {
+      display: none;
+      align-items: center;
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: 4px;
+      padding: 0 6px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      margin: 0 4px;
+      cursor: pointer;
+      user-select: none;
+      vertical-align: middle;
+      transition: all 0.15s ease;
+    }
+
+    .json-ellipsis:hover {
+      background: rgba(59, 130, 246, 0.3);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+    }
+
+    [data-theme="light"] .json-ellipsis {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    [data-theme="light"] .json-ellipsis:hover {
+      background: #dbeafe;
+      color: #1e40af;
+      border-color: #3b82f6;
+    }
+
+    .json-item-count {
+      font-size: 10px;
+      font-weight: 500;
+      opacity: 0.85;
+      margin-left: 2px;
+    }
+
+    .hl-bracket {
+      color: #e2e8f0;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    [data-theme="light"] .hl-bracket {
+      color: #334155;
+    }
+
+    .hl-bracket:hover {
+      color: var(--accent-primary);
+    }
+
+    /* JSON Colors (Light Mode) */
+    [data-theme="light"] .hl-key {
+      color: #1d4ed8;
+    }
+
+    [data-theme="light"] .hl-string {
+      color: #15803d;
+    }
+
+    [data-theme="light"] .hl-number {
+      color: #c2410c;
+    }
+
+    [data-theme="light"] .hl-boolean {
+      color: #db2777;
+    }
+
+    [data-theme="light"] .hl-null {
+      color: #7c3aed;
+    }
+
+    [data-theme="light"] .hl-punctuation {
+      color: #64748b;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-primary);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1>HTTP Request Tester</h1>
+      </div>
+      <button type="button" class="btn-sm btn-sidebar-toggle" id="btnToggleSidebarBrand"
+        title="Toggle History Sidebar (Alt+H)" style="margin-left: 6px; padding: 2px 8px; font-size: 11px;">
+        🕒 History
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-sm btn-sidebar-toggle" id="btnToggleSidebar" title="Toggle Request History Sidebar (Alt+H)">
+        🕒 History
+      </button>
+      <button class="btn-sm" id="btnThemeToggle" title="Toggle Light / Dark Mode">
+        🌙 Theme
+      </button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+
+    <!-- Left Sidebar: Request History -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span>🕒 Request History</span>
+        <div style="display: flex; gap: 4px; align-items: center;">
+          <button type="button" class="btn-sm" id="btnClearFullHistory" style="padding: 2px 6px; font-size: 10px;"
+            title="Clear all history">Clear</button>
+          <button type="button" class="btn-sm" id="btnCollapseSidebar" style="padding: 2px 6px; font-size: 10px;"
+            title="Hide History Sidebar (Alt+H)">◀</button>
+        </div>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="sidebar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="sidebarSearchInput" placeholder="Filter history..." />
+        </div>
+
+        <div id="historyListContainer"></div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+
+      <!-- Peek button when sidebar is collapsed (fixed to viewport edge) -->
+      <button type="button" class="btn-sidebar-peek" id="btnSidebarPeek" title="Open Request History Sidebar (Alt+H)">
+        ▶ 🕒 History
+      </button>
+
+      <!-- Left Panel: Request Configuration -->
+      <section class="panel" id="requestPanel">
+
+        <form id="requestForm">
+
+          <!-- URL Bar Section -->
+          <div class="field-section">
+            <div class="field-header">
+              <span class="field-title">
+                🌐 Request Endpoint
+              </span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="btn-new-req" id="btnQuickNew" title="Start new blank request (Alt+N)">
+                  ✨ Add New Request
+                </button>
+                <!-- Recent URLs Dropdown -->
+                <div class="smart-dropdown">
+                  <button type="button" class="btn-recents" id="btnUrlDropdown">
+                    🕒 Recent URLs ▾
+                  </button>
+                  <div class="dropdown-menu" id="urlDropdownMenu">
+                    <div class="dropdown-header">
+                      <span>Recent URLs</span>
+                      <button type="button" class="btn-sm" id="btnClearUrlHistory"
+                        style="padding: 1px 5px; font-size: 9px;">Clear</button>
+                    </div>
+                    <div id="urlDropdownList"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="url-row">
+              <select id="method" class="method-select">
+                <option value="POST">POST</option>
+                <option value="GET">GET</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+                <option value="OPTIONS">OPTIONS</option>
+                <option value="HEAD">HEAD</option>
+              </select>
+
+              <div class="url-input-container">
+                <input type="url" id="url" class="url-input" placeholder="https://example.com/api/test"
+                  list="urlDatalist" required />
+                <datalist id="urlDatalist"></datalist>
+              </div>
+
+              <button type="submit" id="submitBtn" class="btn-send">
+                <span>Send</span> ➔
+              </button>
+            </div>
+          </div>
+
+          <!-- Headers Section (with top spacing) -->
+          <div class="field-section">
+            <div class="field-header">
+              <span class="field-title">
+                📑 Headers (optional)
+              </span>
+              <!-- Recent Headers Dropdown -->
+              <div class="smart-dropdown">
+                <button type="button" class="btn-recents" id="btnHeadersDropdown">
+                  🕒 Recent Headers ▾
+                </button>
+                <div class="dropdown-menu" id="headersDropdownMenu">
+                  <div class="dropdown-header">
+                    <span>Recent Headers</span>
+                    <button type="button" class="btn-sm" id="btnClearHeadersHistory"
+                      style="padding: 1px 5px; font-size: 9px;">Clear</button>
+                  </div>
+                  <div id="headersDropdownList"></div>
+                </div>
+              </div>
+            </div>
+
+            <textarea id="headers" class="code-editor" style="min-height: 120px;" placeholder="Accept: application/json
+Authorization: Bearer your-token
+actor-id: 18117
+site-id: 173
+space-id: 16658"></textarea>
+          </div>
+
+          <!-- Payload Section (with top spacing) -->
+          <div class="field-section" id="payloadSection">
+            <div class="field-header">
+              <span class="field-title">
+                📦 JSON Payload
+              </span>
+              <!-- Recent Payloads Dropdown -->
+              <div class="smart-dropdown">
+                <button type="button" class="btn-recents" id="btnPayloadDropdown">
+                  🕒 Recent Payloads ▾
+                </button>
+                <div class="dropdown-menu" id="payloadDropdownMenu">
+                  <div class="dropdown-header">
+                    <span>Recent Payloads</span>
+                    <button type="button" class="btn-sm" id="btnClearPayloadsHistory"
+                      style="padding: 1px 5px; font-size: 9px;">Clear</button>
+                  </div>
+                  <div id="payloadDropdownList"></div>
+                </div>
+              </div>
+            </div>
+
+            <textarea id="payload" class="code-editor" placeholder='{
+  "name": "John",
+  "email": "john@example.com"
+}'></textarea>
+          </div>
+
+        </form>
+
+      </section>
+
+      <!-- Panel Resizer Splitter -->
+      <div class="resizer-divider" id="panelResizer" title="Drag to resize Request and Response panels"></div>
+
+      <!-- Right Panel: Response Output -->
+      <section class="panel" id="responsePanel">
+
+        <div class="response-header">
+          <span class="field-title">
+            📊 Response
+          </span>
+
+          <div class="response-meta" id="responseMeta" style="display: none;">
+            <span class="status-badge" id="statusBadge">200 OK</span>
+            <span class="meta-pill" id="responseTimePill">⏱ 0 ms</span>
+            <span class="meta-pill" id="responseSizePill">📦 0 KB</span>
+          </div>
+        </div>
+
+        <div class="response-body-wrapper">
+          <pre id="response"
+            class="response-output empty">Ready to send request. Enter an endpoint and click Send or press Ctrl+Enter.</pre>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Notification Popup -->
+  <div class="toast" id="toast">Item applied!</div>
+
+  <script>
+    // =========================================================================
+    // STATE & STORAGE ENGINE
+    // =========================================================================
+
+    const STORAGE_KEY = 'pm_recents_data_v3';
+
+    let initialData = {
+      urls: [
+        "https://jsonplaceholder.typicode.com/posts",
+        "https://httpbin.org/post",
+        "https://httpbin.org/get"
+      ],
+      headers: [
+        "Accept: application/json\nAuthorization: Bearer your-token\nactor-id: 18117\nsite-id: 173\nspace-id: 16658",
+        "Content-Type: application/json\nAccept: application/json"
+      ],
+      payloads: [
+        JSON.stringify({
+          userData: {
+            id: "74Kyow",
+            body: {
+              context: { siteId: 105, spaceId: 6556 },
+              personFirstName: "Kailash",
+              personLastName: "Joshi",
+              phone: "6122171798",
+              primaryId: "Kailash_kjoshi@contata.com",
+              type: "SMS"
+            }
+          }
+        }, null, 2),
+        JSON.stringify({ name: "John Doe", email: "john@example.com" }, null, 2)
+      ],
+      history: []
+    };
+
+    if (window.INITIAL_POSTMAN_DATA) {
+      if (Array.isArray(window.INITIAL_POSTMAN_DATA.urls)) {
+        initialData.urls = window.INITIAL_POSTMAN_DATA.urls.map(u => typeof u === 'string' ? u : u.url);
+      }
+      if (Array.isArray(window.INITIAL_POSTMAN_DATA.headers)) {
+        initialData.headers = window.INITIAL_POSTMAN_DATA.headers.map(h => typeof h === 'string' ? h : h.value);
+      }
+      if (Array.isArray(window.INITIAL_POSTMAN_DATA.payloads)) {
+        initialData.payloads = window.INITIAL_POSTMAN_DATA.payloads.map(p => typeof p === 'string' ? p : p.value);
+      }
+      if (Array.isArray(window.INITIAL_POSTMAN_DATA.history)) {
+        initialData.history = window.INITIAL_POSTMAN_DATA.history;
+      }
+    }
+
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.urls) initialData.urls = parsed.urls;
+        if (parsed.headers) initialData.headers = parsed.headers;
+        if (parsed.payloads) initialData.payloads = parsed.payloads;
+        if (parsed.history) initialData.history = parsed.history;
+      } catch (e) { }
+    }
+
+    function deduplicateHistory(historyList) {
+      if (!Array.isArray(historyList)) return [];
+      const seen = new Set();
+      const result = [];
+      for (const item of historyList) {
+        if (!item || !item.url) continue;
+        const key = `${(item.method || 'GET').toUpperCase()}:::${(item.url || '').trim().toLowerCase()}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          result.push(item);
+        }
+      }
+      return result;
+    }
+
+    let state = {
+      urls: initialData.urls || [],
+      headers: initialData.headers || [],
+      payloads: initialData.payloads || [],
+      history: deduplicateHistory(initialData.history || [])
+    };
+
+    function persistState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) { }
+    }
+
+    persistState();
+
+    // =========================================================================
+    // DOM ELEMENTS
+    // =========================================================================
+
+    const form = document.getElementById("requestForm");
+    const methodInput = document.getElementById("method");
+    const urlInput = document.getElementById("url");
+    const urlDatalist = document.getElementById("urlDatalist");
+    const payloadInput = document.getElementById("payload");
+    const headersInput = document.getElementById("headers");
+    const payloadSection = document.getElementById("payloadSection");
+    const responseElement = document.getElementById("response");
+    const submitBtn = document.getElementById("submitBtn");
+    const toast = document.getElementById("toast");
+
+    // History Sidebar
+    const historyListContainer = document.getElementById("historyListContainer");
+    const sidebarSearchInput = document.getElementById("sidebarSearchInput");
+
+    // Dropdowns
+    const btnUrlDropdown = document.getElementById("btnUrlDropdown");
+    const urlDropdownMenu = document.getElementById("urlDropdownMenu");
+    const urlDropdownList = document.getElementById("urlDropdownList");
+
+    const btnHeadersDropdown = document.getElementById("btnHeadersDropdown");
+    const headersDropdownMenu = document.getElementById("headersDropdownMenu");
+    const headersDropdownList = document.getElementById("headersDropdownList");
+
+    const btnPayloadDropdown = document.getElementById("btnPayloadDropdown");
+    const payloadDropdownMenu = document.getElementById("payloadDropdownMenu");
+    const payloadDropdownList = document.getElementById("payloadDropdownList");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
+    }
+
+    // Close dropdowns on outside click
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".smart-dropdown")) {
+        document.querySelectorAll(".dropdown-menu").forEach(el => el.classList.remove("show"));
+      }
+    });
+
+    // Theme Toggle
+    const btnThemeToggle = document.getElementById("btnThemeToggle");
+    const currentTheme = localStorage.getItem('pm_theme') || "dark";
+    if (currentTheme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+      btnThemeToggle.textContent = "☀️ Theme";
+    }
+
+    btnThemeToggle.addEventListener("click", () => {
+      const isLight = document.documentElement.getAttribute("data-theme") === "light";
+      if (isLight) {
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem('pm_theme', "dark");
+        btnThemeToggle.textContent = "🌙 Theme";
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem('pm_theme', "light");
+        btnThemeToggle.textContent = "☀️ Theme";
+      }
+    });
+
+    // =========================================================================
+    // RECENT URLS
+    // =========================================================================
+
+    function rememberUrl(url) {
+      if (!url || !url.trim()) return;
+      url = url.trim();
+
+      const existingIdx = state.urls.findIndex(u => u.toLowerCase() === url.toLowerCase());
+      if (existingIdx !== -1) {
+        state.urls.splice(existingIdx, 1);
+      }
+      state.urls.unshift(url);
+      if (state.urls.length > 30) state.urls.pop();
+
+      persistState();
+      renderUrlDropdown();
+      renderUrlDatalist();
+    }
+
+    function renderUrlDatalist() {
+      urlDatalist.innerHTML = state.urls.map(u => `<option value="${escapeHtml(u)}"></option>`).join("");
+    }
+
+    function renderUrlDropdown() {
+      if (state.urls.length === 0) {
+        urlDropdownList.innerHTML = `<div class="dropdown-empty">No recent URLs yet.</div>`;
+        return;
+      }
+
+      urlDropdownList.innerHTML = state.urls.map((url, idx) => `
+        <div class="dropdown-item" data-idx="${idx}">
+          <div class="dropdown-item-preview">${escapeHtml(url)}</div>
+          <div class="dropdown-item-actions">
+            <button type="button" class="btn-icon-mini btn-del" title="Remove">✕</button>
+          </div>
+        </div>
+      `).join("");
+
+      urlDropdownList.querySelectorAll(".dropdown-item").forEach(itemEl => {
+        itemEl.addEventListener("click", (e) => {
+          if (e.target.closest(".btn-del")) return;
+          const idx = parseInt(itemEl.dataset.idx);
+          urlInput.value = state.urls[idx];
+          urlDropdownMenu.classList.remove("show");
+          showToast("Loaded recent URL");
+        });
+
+        const delBtn = itemEl.querySelector(".btn-del");
+        if (delBtn) {
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const idx = parseInt(itemEl.dataset.idx);
+            state.urls.splice(idx, 1);
+            persistState();
+            renderUrlDropdown();
+            renderUrlDatalist();
+          });
+        }
+      });
+    }
+
+    btnUrlDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+      urlDropdownMenu.classList.toggle("show");
+      headersDropdownMenu.classList.remove("show");
+      payloadDropdownMenu.classList.remove("show");
+    });
+
+    document.getElementById("btnClearUrlHistory").addEventListener("click", () => {
+      state.urls = [];
+      persistState();
+      renderUrlDropdown();
+      renderUrlDatalist();
+      showToast("Cleared recent URLs");
+    });
+
+    // =========================================================================
+    // RECENT HEADERS
+    // =========================================================================
+
+    function rememberHeaders(headersText) {
+      if (!headersText || !headersText.trim()) return;
+      const trimmed = headersText.trim();
+
+      const existingIdx = state.headers.findIndex(h => h.trim() === trimmed);
+      if (existingIdx !== -1) {
+        state.headers.splice(existingIdx, 1);
+      }
+      state.headers.unshift(trimmed);
+      if (state.headers.length > 25) state.headers.pop();
+
+      persistState();
+      renderHeadersDropdown();
+    }
+
+    function renderHeadersDropdown() {
+      if (state.headers.length === 0) {
+        headersDropdownList.innerHTML = `<div class="dropdown-empty">No recent headers yet.</div>`;
+        return;
+      }
+
+      headersDropdownList.innerHTML = state.headers.map((h, idx) => `
+        <div class="dropdown-item" data-idx="${idx}">
+          <div class="dropdown-item-preview">${escapeHtml(h)}</div>
+          <div class="dropdown-item-actions">
+            <button type="button" class="btn-icon-mini btn-del" title="Remove">✕</button>
+          </div>
+        </div>
+      `).join("");
+
+      headersDropdownList.querySelectorAll(".dropdown-item").forEach(itemEl => {
+        itemEl.addEventListener("click", (e) => {
+          if (e.target.closest(".btn-del")) return;
+          const idx = parseInt(itemEl.dataset.idx);
+          headersInput.value = state.headers[idx];
+          headersDropdownMenu.classList.remove("show");
+          showToast("Loaded recent headers");
+        });
+
+        const delBtn = itemEl.querySelector(".btn-del");
+        if (delBtn) {
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const idx = parseInt(itemEl.dataset.idx);
+            state.headers.splice(idx, 1);
+            persistState();
+            renderHeadersDropdown();
+          });
+        }
+      });
+    }
+
+    btnHeadersDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+      headersDropdownMenu.classList.toggle("show");
+      urlDropdownMenu.classList.remove("show");
+      payloadDropdownMenu.classList.remove("show");
+    });
+
+    document.getElementById("btnClearHeadersHistory").addEventListener("click", () => {
+      state.headers = [];
+      persistState();
+      renderHeadersDropdown();
+      showToast("Cleared recent headers");
+    });
+
+    // =========================================================================
+    // RECENT PAYLOADS
+    // =========================================================================
+
+    function rememberPayload(payloadText) {
+      if (!payloadText || !payloadText.trim()) return;
+      const trimmed = payloadText.trim();
+
+      const existingIdx = state.payloads.findIndex(p => p.trim() === trimmed);
+      if (existingIdx !== -1) {
+        state.payloads.splice(existingIdx, 1);
+      }
+      state.payloads.unshift(trimmed);
+      if (state.payloads.length > 25) state.payloads.pop();
+
+      persistState();
+      renderPayloadDropdown();
+    }
+
+    function renderPayloadDropdown() {
+      if (state.payloads.length === 0) {
+        payloadDropdownList.innerHTML = `<div class="dropdown-empty">No recent payloads yet.</div>`;
+        return;
+      }
+
+      payloadDropdownList.innerHTML = state.payloads.map((p, idx) => `
+        <div class="dropdown-item" data-idx="${idx}">
+          <div class="dropdown-item-preview">${escapeHtml(p)}</div>
+          <div class="dropdown-item-actions">
+            <button type="button" class="btn-icon-mini btn-del" title="Remove">✕</button>
+          </div>
+        </div>
+      `).join("");
+
+      payloadDropdownList.querySelectorAll(".dropdown-item").forEach(itemEl => {
+        itemEl.addEventListener("click", (e) => {
+          if (e.target.closest(".btn-del")) return;
+          const idx = parseInt(itemEl.dataset.idx);
+          payloadInput.value = state.payloads[idx];
+          payloadDropdownMenu.classList.remove("show");
+          showToast("Loaded recent payload");
+        });
+
+        const delBtn = itemEl.querySelector(".btn-del");
+        if (delBtn) {
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const idx = parseInt(itemEl.dataset.idx);
+            state.payloads.splice(idx, 1);
+            persistState();
+            renderPayloadDropdown();
+          });
+        }
+      });
+    }
+
+    btnPayloadDropdown.addEventListener("click", (e) => {
+      e.stopPropagation();
+      payloadDropdownMenu.classList.toggle("show");
+      urlDropdownMenu.classList.remove("show");
+      headersDropdownMenu.classList.remove("show");
+    });
+
+    document.getElementById("btnClearPayloadsHistory").addEventListener("click", () => {
+      state.payloads = [];
+      persistState();
+      renderPayloadDropdown();
+      showToast("Cleared recent payloads");
+    });
+
+    // =========================================================================
+    // REQUEST HISTORY SIDEBAR
+    // =========================================================================
+
+    function logHistory(entry) {
+      if (!entry || !entry.url) return;
+      const key = `${(entry.method || 'GET').toUpperCase()}:::${(entry.url || '').trim().toLowerCase()}`;
+      const existingIdx = state.history.findIndex(item =>
+        item && `${(item.method || 'GET').toUpperCase()}:::${(item.url || '').trim().toLowerCase()}` === key
+      );
+      if (existingIdx !== -1) {
+        state.history.splice(existingIdx, 1);
+      }
+      state.history.unshift(entry);
+      if (state.history.length > 40) state.history.pop();
+      persistState();
+      renderHistoryList(sidebarSearchInput ? sidebarSearchInput.value : "");
+    }
+
+    function renderHistoryList(filterQuery = "") {
+      const query = (filterQuery || "").toLowerCase();
+
+      const filtered = state.history.filter(item => {
+        if (!query) return true;
+        return item.url.toLowerCase().includes(query) ||
+          item.method.toLowerCase().includes(query) ||
+          (item.status && String(item.status).includes(query));
+      });
+
+      if (filtered.length === 0) {
+        historyListContainer.innerHTML = `<div class="dropdown-empty">No requests logged yet.</div>`;
+        return;
+      }
+
+      historyListContainer.innerHTML = filtered.map((item, idx) => {
+        let statusClass = "status-2xx";
+        if (!item.status || item.status >= 500) statusClass = "status-5xx";
+        else if (item.status >= 400) statusClass = "status-4xx";
+        else if (item.status === "ERR") statusClass = "status-err";
+
+        const timeStr = new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        return `
+          <div class="history-card" data-idx="${idx}">
+            <div class="history-card-header">
+              <span class="method-tag method-${item.method}">${item.method}</span>
+              <span class="status-badge ${statusClass}">${item.status || 'ERR'} ${item.duration ? `(${item.duration}ms)` : ''}</span>
+            </div>
+            <div class="history-url" title="${escapeHtml(item.url)}">${escapeHtml(item.url)}</div>
+            <div class="history-meta">
+              <span>${timeStr}</span>
+              <span>${item.size || ''}</span>
+            </div>
+            <div class="history-actions">
+              <button type="button" class="btn-icon-mini btn-del-hist" title="Remove">✕</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      historyListContainer.querySelectorAll(".history-card").forEach(card => {
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".btn-del-hist")) return;
+          const idx = parseInt(card.dataset.idx);
+          const item = filtered[idx];
+          if (item.method) {
+            methodInput.value = item.method;
+            if (item.method === "GET") payloadSection.classList.add("hidden");
+            else payloadSection.classList.remove("hidden");
+          }
+          if (item.url) urlInput.value = item.url;
+          if (item.headers !== undefined) headersInput.value = item.headers;
+          if (item.payload !== undefined) payloadInput.value = item.payload;
+          showToast(`Restored: ${item.method} ${item.url}`);
+        });
+
+        const delBtn = card.querySelector(".btn-del-hist");
+        if (delBtn) {
+          delBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const idx = parseInt(card.dataset.idx);
+            const originalIdx = state.history.indexOf(filtered[idx]);
+            if (originalIdx !== -1) {
+              state.history.splice(originalIdx, 1);
+              persistState();
+              renderHistoryList(sidebarSearchInput.value);
+            }
+          });
+        }
+      });
+    }
+
+    sidebarSearchInput.addEventListener("input", (e) => {
+      renderHistoryList(e.target.value);
+    });
+
+    document.getElementById("btnClearFullHistory").addEventListener("click", () => {
+      state.history = [];
+      persistState();
+      renderHistoryList();
+      showToast("History cleared");
+    });
+
+    // Method change handler
+    methodInput.addEventListener("change", () => {
+      if (methodInput.value === "GET") {
+        payloadSection.classList.add("hidden");
+      } else {
+        payloadSection.classList.remove("hidden");
+      }
+    });
+
+    // =========================================================================
+    // SIDEBAR TOGGLE & NEW REQUEST LOGIC
+    // =========================================================================
+
+    // Sidebar Collapse / Expand Logic
+    const appLayout = document.querySelector(".app-layout");
+    const btnCollapseSidebar = document.getElementById("btnCollapseSidebar");
+    const btnSidebarPeek = document.getElementById("btnSidebarPeek");
+
+    function setSidebarCollapsed(collapsed) {
+      if (!appLayout) return;
+      if (collapsed) {
+        appLayout.classList.add("sidebar-collapsed");
+        document.querySelectorAll(".btn-sidebar-toggle").forEach(el => {
+          el.style.opacity = "0.75";
+          el.classList.remove("active");
+        });
+        localStorage.setItem("pm_sidebar_collapsed", "true");
+      } else {
+        appLayout.classList.remove("sidebar-collapsed");
+        document.querySelectorAll(".btn-sidebar-toggle").forEach(el => {
+          el.style.opacity = "1";
+          el.classList.add("active");
+        });
+        localStorage.setItem("pm_sidebar_collapsed", "false");
+      }
+    }
+
+    function toggleSidebar() {
+      if (!appLayout) return;
+      const isCollapsed = appLayout.classList.contains("sidebar-collapsed");
+      setSidebarCollapsed(!isCollapsed);
+    }
+
+    document.querySelectorAll(".btn-sidebar-toggle").forEach(btn => {
+      btn.addEventListener("click", toggleSidebar);
+    });
+
+    if (btnCollapseSidebar) btnCollapseSidebar.addEventListener("click", () => setSidebarCollapsed(true));
+    if (btnSidebarPeek) btnSidebarPeek.addEventListener("click", () => setSidebarCollapsed(false));
+
+    // Restore saved sidebar state
+    const savedSidebarState = localStorage.getItem("pm_sidebar_collapsed");
+    if (savedSidebarState === "true") {
+      setSidebarCollapsed(true);
+    }
+
+    // Keyboard shortcut Alt+H or Ctrl+B to toggle sidebar
+    document.addEventListener("keydown", (e) => {
+      if ((e.altKey && (e.key === "h" || e.key === "H")) || ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B"))) {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    });
+
+    let currentRawResponseText = "";
+
+    function resetToNewRequest() {
+      methodInput.value = "GET";
+      urlInput.value = "";
+      headersInput.value = "";
+      payloadInput.value = "";
+      payloadSection.classList.add("hidden");
+
+      currentRawResponseText = "";
+
+      responseElement.className = "response-output empty";
+      responseElement.textContent = "Ready to send request. Enter an endpoint and click Send or press Ctrl+Enter.";
+
+      const responseMeta = document.getElementById("responseMeta");
+      if (responseMeta) responseMeta.style.display = "none";
+
+      urlInput.focus();
+      showToast("✨ Ready for new request");
+    }
+
+    const btnQuickNew = document.getElementById("btnQuickNew");
+    if (btnQuickNew) btnQuickNew.addEventListener("click", resetToNewRequest);
+
+    function toggleNode(node, forceCollapse, recursive = false) {
+      if (!node) return;
+      const willCollapse = typeof forceCollapse === 'boolean' ? forceCollapse : !node.classList.contains("collapsed");
+      if (willCollapse) {
+        node.classList.add("collapsed");
+      } else {
+        node.classList.remove("collapsed");
+      }
+      if (recursive) {
+        const children = node.querySelectorAll(".json-node");
+        children.forEach(child => {
+          if (willCollapse) child.classList.add("collapsed");
+          else child.classList.remove("collapsed");
+        });
+      }
+    }
+
+    // Interactive Collapsing, Expand/Collapse All & Copy on Click
+    responseElement.addEventListener("click", (e) => {
+      // Copy action
+      const copyBtn = e.target.closest(".btn-copy-res");
+      if (copyBtn) {
+        e.stopPropagation();
+        const textToCopy = currentRawResponseText || responseElement.innerText || responseElement.textContent;
+        if (!textToCopy || textToCopy.startsWith("Ready to send")) return;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          showToast("📋 Response copied!");
+        });
+        return;
+      }
+
+      // Combined Toggle Expand / Collapse action
+      const toggleCollapseBtn = e.target.closest(".btn-toggle-collapse, .btn-expand-all, .btn-collapse-all");
+      if (toggleCollapseBtn) {
+        e.stopPropagation();
+        const rootNode = responseElement.querySelector(".json-tree > .json-node");
+        const allNodes = responseElement.querySelectorAll(".json-node");
+        const collapsedNodes = responseElement.querySelectorAll(".json-node.collapsed");
+
+        // If any nodes are collapsed, expand everything
+        if (collapsedNodes.length > 0) {
+          collapsedNodes.forEach(node => node.classList.remove("collapsed"));
+          toggleCollapseBtn.innerHTML = '▶ Collapse';
+          showToast("Expanded all JSON nodes");
+        } else {
+          // If everything is open, collapse all nested objects (keep root open)
+          allNodes.forEach(node => {
+            if (node === rootNode) {
+              node.classList.remove("collapsed");
+            } else {
+              node.classList.add("collapsed");
+            }
+          });
+          toggleCollapseBtn.innerHTML = '▼ Expand';
+          showToast("Collapsed all nested objects");
+        }
+        return;
+      }
+
+      // JSON Node Toggle
+      const toggle = e.target.closest(".json-toggle");
+      if (toggle) {
+        e.stopPropagation();
+        const node = toggle.closest(".json-node");
+        if (node) {
+          if (e.altKey) {
+            const isCurrentlyCollapsed = node.classList.contains("collapsed");
+            toggleNode(node, !isCurrentlyCollapsed, true);
+          } else {
+            node.classList.toggle("collapsed");
+          }
+        }
+        return;
+      }
+
+      // JSON Ellipsis Pill
+      const ellipsis = e.target.closest(".json-ellipsis");
+      if (ellipsis) {
+        e.stopPropagation();
+        const node = ellipsis.closest(".json-node");
+        if (node) {
+          if (e.altKey) {
+            toggleNode(node, false, true);
+          } else {
+            node.classList.remove("collapsed");
+          }
+        }
+        return;
+      }
+
+      // JSON Bracket
+      const bracket = e.target.closest(".hl-bracket");
+      if (bracket) {
+        e.stopPropagation();
+        const node = bracket.closest(".json-node");
+        if (node) {
+          if (e.altKey) {
+            const isCurrentlyCollapsed = node.classList.contains("collapsed");
+            toggleNode(node, !isCurrentlyCollapsed, true);
+          } else {
+            node.classList.toggle("collapsed");
+          }
+        }
+        return;
+      }
+    });
+
+    responseElement.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        const toggle = e.target.closest(".json-toggle");
+        if (toggle) {
+          e.preventDefault();
+          const node = toggle.closest(".json-node");
+          if (node) node.classList.toggle("collapsed");
+        }
+      }
+    });
+
+    // Ctrl+Enter to send, Alt+N for New Request
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        form.requestSubmit();
+      }
+      if ((e.ctrlKey && e.altKey && (e.key === "n" || e.key === "N")) || (e.altKey && (e.key === "n" || e.key === "N"))) {
+        e.preventDefault();
+        resetToNewRequest();
+      }
+    });
+
+    // =========================================================================
+    // PARSE HEADERS & JSON TREE BUILDER
+    // =========================================================================
+
+    function parseHeaders(input) {
+      const headers = {};
+      if (!input || !input.trim()) return headers;
+
+      let text = input.trim();
+      if (text.startsWith("{") && text.endsWith("}")) {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          text = text.substring(1, text.length - 1);
+        }
+      }
+
+      const lines = text.split(/\r?\n/);
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue;
+
+        const colonIndex = trimmedLine.indexOf(":");
+        if (colonIndex === -1) {
+          throw new Error(`Invalid header:\n${trimmedLine}\n\nExpected format:\nHeader-Name: value`);
+        }
+
+        const key = trimmedLine.substring(0, colonIndex).trim();
+        const value = trimmedLine.substring(colonIndex + 1).trim();
+        if (key) headers[key] = value;
+      }
+
+      return headers;
+    }
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function buildJsonTreeHtml(data) {
+      if (data === null) {
+        return '<span class="hl-null">null</span>';
+      }
+      const type = typeof data;
+      if (type === 'boolean') {
+        return `<span class="hl-boolean">${data}</span>`;
+      }
+      if (type === 'number') {
+        return `<span class="hl-number">${data}</span>`;
+      }
+      if (type === 'string') {
+        return `<span class="hl-string">${escapeHtml(JSON.stringify(data))}</span>`;
+      }
+      if (Array.isArray(data)) {
+        if (data.length === 0) {
+          return '<span class="hl-bracket">[]</span>';
+        }
+        const countText = data.length === 1 ? '1 item' : `${data.length} items`;
+        let rowsHtml = '';
+        for (let i = 0; i < data.length; i++) {
+          const isLast = i === data.length - 1;
+          rowsHtml += `<div class="json-row">${buildJsonTreeHtml(data[i])}${isLast ? '' : '<span class="hl-punctuation">,</span>'}</div>`;
+        }
+        return `<span class="json-node" data-type="array">` +
+          `<span class="json-toggle" role="button" tabindex="0" title="Click to collapse / expand"><svg class="json-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></span>` +
+          `<span class="hl-bracket open-bracket">[</span>` +
+          `<span class="json-ellipsis" title="Click to expand">[ <span class="json-item-count">${countText}</span> ]</span>` +
+          `<div class="json-body">${rowsHtml}</div>` +
+          `<span class="hl-bracket close-bracket">]</span>` +
+          `</span>`;
+      }
+      if (type === 'object') {
+        const keys = Object.keys(data);
+        if (keys.length === 0) {
+          return '<span class="hl-bracket">{}</span>';
+        }
+        const countText = keys.length === 1 ? '1 key' : `${keys.length} keys`;
+        let rowsHtml = '';
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+          const isLast = i === keys.length - 1;
+          rowsHtml += `<div class="json-row"><span class="hl-key">${escapeHtml(JSON.stringify(key))}</span><span class="hl-punctuation">: </span>${buildJsonTreeHtml(data[key])}${isLast ? '' : '<span class="hl-punctuation">,</span>'}</div>`;
+        }
+        return `<span class="json-node" data-type="object">` +
+          `<span class="json-toggle" role="button" tabindex="0" title="Click to collapse / expand"><svg class="json-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></span>` +
+          `<span class="hl-bracket open-bracket">{</span>` +
+          `<span class="json-ellipsis" title="Click to expand">{ <span class="json-item-count">${countText}</span> }</span>` +
+          `<div class="json-body">${rowsHtml}</div>` +
+          `<span class="hl-bracket close-bracket">}</span>` +
+          `</span>`;
+      }
+      return escapeHtml(String(data));
+    }
+
+    // =========================================================================
+    // SEND REQUEST LOGIC
+    // =========================================================================
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const method = methodInput.value;
+      const url = urlInput.value.trim();
+      const payloadText = payloadInput.value.trim();
+      const headersText = headersInput.value.trim();
+
+      const responseMeta = document.getElementById("responseMeta");
+      const statusBadge = document.getElementById("statusBadge");
+      const responseTimePill = document.getElementById("responseTimePill");
+      const responseSizePill = document.getElementById("responseSizePill");
+
+      // Auto-save into Recents!
+      rememberUrl(url);
+      if (headersText) rememberHeaders(headersText);
+      if (method !== "GET" && payloadText) rememberPayload(payloadText);
+
+      // Validate payload
+      let payload = {};
+      if (method !== "GET" && payloadText) {
+        try {
+          payload = JSON.parse(payloadText);
+        } catch (error) {
+          currentRawResponseText = "";
+          responseElement.className = "response-output error";
+          responseElement.textContent = "Invalid JSON payload:\n\n" + error.message;
+          responseMeta.style.display = "none";
+          return;
+        }
+      }
+
+      // Validate headers
+      let headers = {};
+      try {
+        headers = parseHeaders(headersText);
+      } catch (error) {
+        currentRawResponseText = "";
+        responseElement.className = "response-output error";
+        responseElement.textContent = "Invalid headers:\n\n" + error.message;
+        responseMeta.style.display = "none";
+        return;
+      }
+
+      // Loading state
+      currentRawResponseText = "";
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Sending...</span>';
+      responseElement.className = "response-output";
+      responseElement.textContent = "Connecting to " + url + "...";
+      responseMeta.style.display = "none";
+
+      const startTime = performance.now();
+
+      try {
+        const hasContentType = Object.keys(headers).some(key => key.toLowerCase() === "content-type");
+        if (method !== "GET" && !hasContentType && payloadText) {
+          headers["Content-Type"] = "application/json";
+        }
+
+        const requestOptions = {
+          method: method,
+          headers: headers
+        };
+
+        if (method !== "GET" && payloadText) {
+          requestOptions.body = JSON.stringify(payload);
+        }
+
+        const response = await fetch(url, requestOptions);
+        const duration = Math.round(performance.now() - startTime);
+
+        const contentType = response.headers.get("content-type") || "";
+        let responseData;
+        let responseRawText = "";
+        let isJson = false;
+
+        if (contentType.includes("json")) {
+          try {
+            responseData = await response.json();
+            responseRawText = JSON.stringify(responseData, null, 2);
+            isJson = true;
+          } catch (e) {
+            responseData = await response.text();
+            responseRawText = responseData;
+          }
+        } else {
+          responseData = await response.text();
+          responseRawText = responseData;
+          try {
+            responseData = JSON.parse(responseRawText);
+            responseRawText = JSON.stringify(responseData, null, 2);
+            isJson = true;
+          } catch (e) { }
+        }
+
+        currentRawResponseText = responseRawText;
+
+        const sizeInBytes = new Blob([responseRawText]).size;
+        const sizeFormatted = sizeInBytes > 1024 ? (sizeInBytes / 1024).toFixed(1) + " KB" : sizeInBytes + " B";
+
+        const statusCategoryClass = response.status < 300 ? "status-2xx" : (response.status < 500 ? "status-4xx" : "status-5xx");
+
+        responseMeta.style.display = "flex";
+        statusBadge.textContent = `${response.status} ${response.statusText}`;
+        statusBadge.className = "status-badge " + statusCategoryClass;
+        responseTimePill.textContent = `⏱ ${duration} ms`;
+        responseSizePill.textContent = `📦 ${sizeFormatted}`;
+
+        const headerHtml = `
+<div class="res-meta-line">
+  <div class="res-meta-url-row">
+    <span class="method-tag method-${method.toUpperCase()}">${escapeHtml(method)}</span>
+    <span class="res-url">${escapeHtml(url)}</span>
+  </div>
+  <div class="res-meta-status-row">
+    <span class="status-badge ${statusCategoryClass}">HTTP ${response.status} ${escapeHtml(response.statusText)}</span>
+    <span class="res-duration">(${duration}ms)</span>
+  </div>
+  <div class="res-meta-toolbar">
+    ${isJson ? `
+      <button type="button" class="btn-res-action btn-toggle-collapse" title="Toggle Expand / Collapse JSON objects">
+        ▶ Collapse
+      </button>
+    ` : ''}
+    <button type="button" class="btn-res-action btn-copy-res" title="Copy response to clipboard">
+      📋 Copy
+    </button>
+  </div>
+</div>`;
+
+        let bodyHtml = "";
+        if (isJson) {
+          bodyHtml = `<div class="json-tree">${buildJsonTreeHtml(responseData)}</div>`;
+        } else {
+          bodyHtml = `<div style="white-space: pre-wrap; font-family: var(--font-mono);">${escapeHtml(responseRawText)}</div>`;
+        }
+
+        responseElement.className = "response-output";
+        responseElement.innerHTML = headerHtml + bodyHtml;
+
+        logHistory({
+          id: Date.now(),
+          timestamp: Date.now(),
+          method: method,
+          url: url,
+          headers: headersText,
+          payload: payloadText,
+          status: response.status,
+          statusText: response.statusText,
+          duration: duration,
+          size: sizeFormatted
+        });
+
+      } catch (error) {
+        const duration = Math.round(performance.now() - startTime);
+        currentRawResponseText = "";
+
+        responseElement.className = "response-output error";
+        responseElement.innerHTML = `
+<div class="res-meta-line">
+  <div class="res-meta-url-row">
+    <span class="method-tag method-${method.toUpperCase()}">${escapeHtml(method)}</span>
+    <span class="res-url">${escapeHtml(url)}</span>
+  </div>
+  <div class="res-meta-status-row">
+    <span class="status-badge status-err">Error</span>
+    <span class="res-duration">(${duration}ms)</span>
+  </div>
+  <div class="res-meta-toolbar">
+    <button type="button" class="btn-res-action btn-copy-res" title="Copy error to clipboard">
+      📋 Copy
+    </button>
+  </div>
+</div>
+<div style="white-space: pre-wrap; font-family: var(--font-mono);">Request failed after ${duration}ms:\n\n${escapeHtml(error.message)}\n\nNote: If this is a CORS error, ensure the server supports cross-origin requests.</div>`;
+
+        responseMeta.style.display = "flex";
+        statusBadge.textContent = "Error";
+        statusBadge.className = "status-badge status-err";
+        responseTimePill.textContent = `⏱ ${duration} ms`;
+        responseSizePill.textContent = "📦 0 B";
+
+        logHistory({
+          id: Date.now(),
+          timestamp: Date.now(),
+          method: method,
+          url: url,
+          headers: headersText,
+          payload: payloadText,
+          status: "ERR",
+          statusText: error.message,
+          duration: duration,
+          size: "0 B"
+        });
+
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Send</span> ➔';
+      }
+    });
+
+    // =========================================================================
+    // PANEL RESIZER INTERACTION
+    // =========================================================================
+
+    const resizer = document.getElementById("panelResizer");
+    const requestPanel = document.getElementById("requestPanel");
+    const responsePanel = document.getElementById("responsePanel");
+    const workspaceEl = document.querySelector(".workspace");
+
+    const SAVED_SPLIT_KEY = "pm_panel_split_ratio";
+    const savedSplit = localStorage.getItem(SAVED_SPLIT_KEY);
+    if (savedSplit && requestPanel && responsePanel && window.innerWidth > 900) {
+      const ratio = parseFloat(savedSplit);
+      if (ratio >= 0.2 && ratio <= 0.8) {
+        requestPanel.style.flex = `0 0 ${ratio * 100}%`;
+        responsePanel.style.flex = `1 1 ${(1 - ratio) * 100}%`;
+      }
+    }
+
+    if (resizer && requestPanel && responsePanel && workspaceEl) {
+      let isDragging = false;
+
+      resizer.addEventListener("pointerdown", (e) => {
+        if (window.innerWidth <= 900) return;
+        isDragging = true;
+        resizer.setPointerCapture(e.pointerId);
+        resizer.classList.add("dragging");
+        document.body.style.cursor = "col-resize";
+        document.body.style.userSelect = "none";
+      });
+
+      resizer.addEventListener("pointermove", (e) => {
+        if (!isDragging) return;
+        const workspaceRect = workspaceEl.getBoundingClientRect();
+        const availableWidth = workspaceRect.width - 32 - resizer.offsetWidth;
+        const pointerX = e.clientX - workspaceRect.left - 16;
+
+        let ratio = pointerX / availableWidth;
+        ratio = Math.max(0.2, Math.min(0.8, ratio));
+
+        requestPanel.style.flex = `0 0 ${ratio * 100}%`;
+        responsePanel.style.flex = `1 1 ${(1 - ratio) * 100}%`;
+
+        localStorage.setItem(SAVED_SPLIT_KEY, ratio.toFixed(4));
+      });
+
+      const stopDragging = (e) => {
+        if (isDragging) {
+          isDragging = false;
+          try {
+            resizer.releasePointerCapture(e.pointerId);
+          } catch (err) { }
+          resizer.classList.remove("dragging");
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        }
+      };
+
+      resizer.addEventListener("pointerup", stopDragging);
+      resizer.addEventListener("pointercancel", stopDragging);
+    }
+
+    // Initialize views
+    renderUrlDropdown();
+    renderUrlDatalist();
+    renderHeadersDropdown();
+    renderPayloadDropdown();
+    renderHistoryList();
+
+  </script>
+</body>
+
+</html>

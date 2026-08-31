@@ -1,0 +1,73 @@
+{
+  "urls": [
+    {
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "name": "JSONPlaceholder Posts API",
+      "pinned": true,
+      "timestamp": 1756629000000
+    },
+    {
+      "url": "https://httpbin.org/post",
+      "name": "HttpBin Test POST",
+      "pinned": true,
+      "timestamp": 1756629000000
+    },
+    {
+      "url": "https://httpbin.org/get",
+      "name": "HttpBin Test GET",
+      "pinned": false,
+      "timestamp": 1756629000000
+    }
+  ],
+  "headers": [
+    {
+      "name": "Relevate Auth & Space IDs",
+      "value": "Accept: application/json\nAuthorization: Bearer your-token\nactor-id: 18117\nsite-id: 173\nspace-id: 16658",
+      "pinned": true,
+      "timestamp": 1756629000000
+    },
+    {
+      "name": "Standard JSON Headers",
+      "value": "Content-Type: application/json\nAccept: application/json",
+      "pinned": true,
+      "timestamp": 1756629000000
+    },
+    {
+      "name": "Context Headers (Site 105, Space 6556)",
+      "value": "Content-Type: application/json\nsite-id: 105\nspace-id: 6556\nactor-id: 18117",
+      "pinned": true,
+      "timestamp": 1756629000000
+    }
+  ],
+  "payloads": [
+    {
+      "name": "Relevate User Data Template",
+      "value": "{\n  \"userData\": {\n    \"id\": \"74Kyow\",\n    \"body\": {\n      \"context\": {\n        \"siteId\": 105,\n        \"spaceId\": 6556\n      },\n      \"personFirstName\": \"Kailash\",\n      \"personLastName\": \"Joshi\",\n      \"phone\": \"6122171798\",\n      \"primaryId\": \"Kailash_kjoshi@contata.com\",\n      \"type\": \"SMS\"\n    }\n  }\n}",
+      "pinned": true,
+      "timestamp": 1756629000000
+    },
+    {
+      "name": "Sample Contact Profile",
+      "value": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"role\": \"admin\"\n}",
+      "pinned": true,
+      "timestamp": 1756629000000
+    },
+    {
+      "name": "Query Search Filter",
+      "value": "{\n  \"query\": \"active_users\",\n  \"limit\": 20,\n  \"offset\": 0\n}",
+      "pinned": false,
+      "timestamp": 1756629000000
+    }
+  ],
+  "collections": [
+    {
+      "name": "Create Post Test",
+      "method": "POST",
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "headers": "Content-Type: application/json\nAccept: application/json\nactor-id: 18117\nsite-id: 173\nspace-id: 16658",
+      "payload": "{\n  \"title\": \"foo\",\n  \"body\": \"bar\",\n  \"userId\": 1\n}",
+      "timestamp": 1756629000000
+    }
+  ],
+  "history": []
+}
