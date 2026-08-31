@@ -1194,6 +1194,238 @@
       background: var(--border-color);
       border-radius: 4px;
     }
+    /* cURL Action Buttons */
+    .btn-curl-import {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 11px;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .btn-curl-import:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.45);
+    }
+
+    .btn-curl-copy {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-curl-copy:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-primary);
+      color: #ffffff;
+    }
+
+    [data-theme="light"] .btn-curl-copy:hover {
+      color: #0f172a;
+    }
+
+    /* Modal Backdrop & Dialog */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .modal-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-dialog {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.65);
+      transform: scale(0.95);
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+
+    .modal-backdrop.show .modal-dialog {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-primary);
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      padding: 3px 8px;
+      line-height: 1;
+      transition: all 0.15s ease;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-tip {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .curl-presets-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .curl-preset-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-preset {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+    }
+
+    .btn-preset:hover {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      background: var(--bg-hover);
+    }
+
+    .curl-preview-container {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .curl-preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .curl-preview-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .curl-preview-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    .curl-preview-url {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #38bdf8;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    [data-theme="light"] .curl-preview-url {
+      color: #0284c7;
+    }
+
+    .modal-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-primary);
+    }
   </style>
 </head>
 
@@ -1213,6 +1445,9 @@
     </div>
 
     <div class="header-actions">
+      <button type="button" class="btn-sm" id="btnOpenCurlModalHeader" title="Import cURL command (Alt+I)">
+        📥 Import cURL
+      </button>
       <button class="btn-sm btn-sidebar-toggle" id="btnToggleSidebar" title="Toggle Request History Sidebar (Alt+H)">
         🕒 History
       </button>
@@ -1271,6 +1506,12 @@
               <div style="display: flex; align-items: center; gap: 8px;">
                 <button type="button" class="btn-new-req" id="btnQuickNew" title="Start new blank request (Alt+N)">
                   ✨ Add New Request
+                </button>
+                <button type="button" class="btn-curl-import" id="btnOpenCurlModal" title="Import cURL command (Alt+I)">
+                  📥 Import cURL
+                </button>
+                <button type="button" class="btn-curl-copy" id="btnCopyAsCurl" title="Copy current request as executable cURL (Alt+C)">
+                  📋 Copy cURL
                 </button>
                 <!-- Recent URLs Dropdown -->
                 <div class="smart-dropdown">
@@ -1404,6 +1645,60 @@ space-id: 16658"></textarea>
 
   <!-- Toast Notification Popup -->
   <div class="toast" id="toast">Item applied!</div>
+
+  <!-- Modal: Import cURL -->
+  <div class="modal-backdrop" id="curlModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>📥 Import cURL Command</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseCurlModal" title="Close (Escape)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-tip">
+          Paste a <code>curl</code> command copied from Chrome/Firefox DevTools, Postman, terminal, Swagger, or API documentation.
+        </div>
+
+        <div class="curl-presets-row">
+          <span class="curl-preset-label">Sample Presets:</span>
+          <button type="button" class="btn-preset" id="btnPresetGet">GET + Bearer Auth</button>
+          <button type="button" class="btn-preset" id="btnPresetPost">POST + JSON Body</button>
+          <button type="button" class="btn-preset" id="btnPresetCustom">POST + Custom Headers</button>
+        </div>
+
+        <textarea id="curlCommandInput" class="code-editor" style="min-height: 130px;" placeholder="curl 'https://httpbin.org/post' \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer my-secret-token' \
+  --data-raw '{&quot;greeting&quot;: &quot;Hello World&quot;}'"></textarea>
+
+        <!-- Live Parsed Inspection Preview -->
+        <div class="curl-preview-container" id="curlPreviewContainer">
+          <div class="curl-preview-header">
+            <span>Live Parsing Preview</span>
+            <span id="curlStatusBadge" style="font-size: 10px; color: var(--accent-success); font-weight: 600;">● Ready</span>
+          </div>
+          <div class="curl-preview-meta">
+            <span class="curl-preview-badge" id="prevMethodBadge">METHOD: POST</span>
+            <span class="curl-preview-badge" id="prevHeadersBadge">0 HEADERS</span>
+            <span class="curl-preview-badge" id="prevPayloadBadge">NO BODY</span>
+          </div>
+          <div class="curl-preview-url" id="prevUrlText">https://example.com</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-sm" id="btnClearCurlInput">Clear</button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-sm" id="btnCancelCurlModal">Cancel</button>
+          <button type="button" class="btn-curl-import" id="btnApplyCurlImport" style="padding: 6px 16px; font-size: 12px;">
+            ✨ Import Request
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     // =========================================================================
@@ -2468,6 +2763,439 @@ space-id: 16658"></textarea>
       resizer.addEventListener("pointerup", stopDragging);
       resizer.addEventListener("pointercancel", stopDragging);
     }
+
+    // =========================================================================
+    // CURL HANDLING & PARSING ENGINE
+    // =========================================================================
+
+    /**
+     * Parses raw cURL command into { method, url, headers, payload, error }
+     */
+    function parseCurlCommand(rawText) {
+      if (!rawText || !rawText.trim()) {
+        return { error: "Please enter a cURL command." };
+      }
+
+      let text = rawText.trim();
+
+      // Normalize line continuations (\ or ` or ^) followed by optional whitespace and newlines
+      text = text.replace(/\\\r?\n/g, ' ')
+                 .replace(/`\r?\n/g, ' ')
+                 .replace(/\^\r?\n/g, ' ');
+
+      // Tokenize the command respecting single quotes, double quotes, and escape characters
+      const tokens = [];
+      let currentToken = '';
+      let inSingleQuote = false;
+      let inDoubleQuote = false;
+      let isEscaped = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        if (isEscaped) {
+          currentToken += char;
+          isEscaped = false;
+          continue;
+        }
+
+        if (char === '\\' && !inSingleQuote) {
+          isEscaped = true;
+          continue;
+        }
+
+        if (char === "'" && !inDoubleQuote) {
+          inSingleQuote = !inSingleQuote;
+          continue;
+        }
+
+        if (char === '"' && !inSingleQuote) {
+          inDoubleQuote = !inDoubleQuote;
+          continue;
+        }
+
+        if (/\s/.test(char) && !inSingleQuote && !inDoubleQuote) {
+          if (currentToken.length > 0) {
+            tokens.push(currentToken);
+            currentToken = '';
+          }
+        } else {
+          currentToken += char;
+        }
+      }
+
+      if (currentToken.length > 0) {
+        tokens.push(currentToken);
+      }
+
+      if (tokens.length === 0) {
+        return { error: "No command tokens found." };
+      }
+
+      let method = "";
+      let url = "";
+      const headers = [];
+      const bodyChunks = [];
+      let authUser = "";
+      const cookies = [];
+
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        const nextToken = tokens[i + 1] || "";
+
+        if (token === "curl" || token.endsWith("/curl") || token.endsWith("\\curl")) {
+          continue;
+        }
+
+        // Method flag
+        if (token === "-X" || token === "--request") {
+          method = nextToken.toUpperCase();
+          i++;
+        } else if (token.startsWith("-X") && token.length > 2) {
+          method = token.substring(2).toUpperCase();
+        }
+        // Header flag
+        else if (token === "-H" || token === "--header") {
+          if (nextToken) headers.push(nextToken);
+          i++;
+        } else if (token.startsWith("-H") && token.length > 2) {
+          headers.push(token.substring(2));
+        }
+        // Data / Body flags
+        else if (token === "-d" || token === "--data" || token === "--data-raw" || 
+                 token === "--data-binary" || token === "--data-ascii" || 
+                 token === "--data-urlencode" || token === "--json") {
+          if (nextToken) bodyChunks.push(nextToken);
+          i++;
+        } else if (token.startsWith("-d") && token.length > 2) {
+          bodyChunks.push(token.substring(2));
+        }
+        // Auth flag (-u user:password)
+        else if (token === "-u" || token === "--user") {
+          if (nextToken) authUser = nextToken;
+          i++;
+        } else if (token.startsWith("-u") && token.length > 2) {
+          authUser = token.substring(2);
+        }
+        // User-Agent flag
+        else if (token === "-A" || token === "--user-agent") {
+          if (nextToken) headers.push(`User-Agent: ${nextToken}`);
+          i++;
+        }
+        // Cookie flag
+        else if (token === "-b" || token === "--cookie") {
+          if (nextToken) cookies.push(nextToken);
+          i++;
+        }
+        // URL flag
+        else if (token === "--url") {
+          if (nextToken) url = nextToken;
+          i++;
+        }
+        // Other arguments with parameters to skip safely
+        else if (["-m", "--max-time", "--connect-timeout", "-e", "--referer", "-o", "--output"].includes(token)) {
+          i++;
+        }
+        // Flags to ignore safely (e.g. -k, --insecure, -L, --location, -s, -v, --compressed)
+        else if (token.startsWith("-")) {
+          // ignore boolean flag
+        }
+        // Positional URL detection
+        else if (!url) {
+          if (token.startsWith("http://") || token.startsWith("https://") || token.includes(".") || token.includes("localhost") || token.includes("127.0.0.1")) {
+            url = token;
+          } else if (i === tokens.length - 1 && !token.startsWith("-")) {
+            url = token;
+          }
+        }
+      }
+
+      // Convert Basic Auth to Authorization header
+      if (authUser) {
+        try {
+          const encoded = btoa(authUser);
+          headers.push(`Authorization: Basic ${encoded}`);
+        } catch (e) {
+          headers.push(`Authorization: Basic ${authUser}`);
+        }
+      }
+
+      // Combine cookies
+      if (cookies.length > 0) {
+        headers.push(`Cookie: ${cookies.join("; ")}`);
+      }
+
+      // Format payload
+      let payloadText = bodyChunks.join("&");
+      if (payloadText) {
+        try {
+          const parsed = JSON.parse(payloadText);
+          payloadText = JSON.stringify(parsed, null, 2);
+        } catch (e) {
+          // keep as raw text
+        }
+      }
+
+      // Determine default method if unspecified
+      if (!method) {
+        method = payloadText ? "POST" : "GET";
+      }
+
+      // Clean up URL
+      if (url) {
+        url = url.replace(/^['"<]+|['">]+$/g, '').trim();
+      }
+
+      if (!url) {
+        return { error: "Could not find a valid target URL in the command." };
+      }
+
+      return {
+        method,
+        url,
+        headers: headers.join("\n"),
+        payload: payloadText
+      };
+    }
+
+    /**
+     * Generates an executable cURL command string based on current request parameters
+     */
+    function generateCurlCommand(method, url, headersText, payloadText) {
+      method = (method || "GET").toUpperCase();
+      url = (url || "").trim() || "https://example.com/api";
+
+      const lines = ["curl"];
+
+      if (method !== "GET") {
+        lines.push(`-X ${method}`);
+      }
+
+      // Single quote escaping for bash: replace ' with '\''
+      lines.push(`'${url.replace(/'/g, "'\\''")}'`);
+
+      if (headersText && headersText.trim()) {
+        const headerLines = headersText.trim().split(/\r?\n/);
+        for (const h of headerLines) {
+          const trimmed = h.trim();
+          if (trimmed) {
+            lines.push(`-H '${trimmed.replace(/'/g, "'\\''")}'`);
+          }
+        }
+      }
+
+      if (method !== "GET" && payloadText && payloadText.trim()) {
+        const cleanedPayload = payloadText.trim();
+        lines.push(`--data-raw '${cleanedPayload.replace(/'/g, "'\\''")}'`);
+      }
+
+      return lines.join(" \\\n  ");
+    }
+
+    // Modal & cURL DOM references
+    const curlModalBackdrop = document.getElementById("curlModalBackdrop");
+    const btnOpenCurlModal = document.getElementById("btnOpenCurlModal");
+    const btnOpenCurlModalHeader = document.getElementById("btnOpenCurlModalHeader");
+    const btnCloseCurlModal = document.getElementById("btnCloseCurlModal");
+    const btnCancelCurlModal = document.getElementById("btnCancelCurlModal");
+    const btnApplyCurlImport = document.getElementById("btnApplyCurlImport");
+    const btnClearCurlInput = document.getElementById("btnClearCurlInput");
+    const curlCommandInput = document.getElementById("curlCommandInput");
+    const btnCopyAsCurl = document.getElementById("btnCopyAsCurl");
+
+    // Live preview elements
+    const prevMethodBadge = document.getElementById("prevMethodBadge");
+    const prevHeadersBadge = document.getElementById("prevHeadersBadge");
+    const prevPayloadBadge = document.getElementById("prevPayloadBadge");
+    const prevUrlText = document.getElementById("prevUrlText");
+    const curlStatusBadge = document.getElementById("curlStatusBadge");
+
+    function openCurlModal(initialText = "") {
+      if (initialText) {
+        curlCommandInput.value = initialText;
+      }
+      curlModalBackdrop.classList.add("show");
+      updateCurlLivePreview();
+      setTimeout(() => curlCommandInput.focus(), 50);
+    }
+
+    function closeCurlModal() {
+      curlModalBackdrop.classList.remove("show");
+    }
+
+    function updateCurlLivePreview() {
+      const text = curlCommandInput.value.trim();
+      if (!text) {
+        curlStatusBadge.textContent = "● Enter command";
+        curlStatusBadge.style.color = "var(--text-muted)";
+        prevMethodBadge.textContent = "METHOD: GET";
+        prevHeadersBadge.textContent = "0 HEADERS";
+        prevPayloadBadge.textContent = "NO BODY";
+        prevUrlText.textContent = "https://example.com/api";
+        return;
+      }
+
+      const parsed = parseCurlCommand(text);
+      if (parsed.error) {
+        curlStatusBadge.textContent = `⚠ ${parsed.error}`;
+        curlStatusBadge.style.color = "var(--accent-danger)";
+        prevMethodBadge.textContent = "METHOD: --";
+        prevHeadersBadge.textContent = "0 HEADERS";
+        prevPayloadBadge.textContent = "NO BODY";
+        prevUrlText.textContent = "--";
+      } else {
+        curlStatusBadge.textContent = "● Ready to import";
+        curlStatusBadge.style.color = "var(--accent-success)";
+        prevMethodBadge.textContent = `METHOD: ${parsed.method}`;
+        
+        const headerCount = parsed.headers ? parsed.headers.split("\n").filter(Boolean).length : 0;
+        prevHeadersBadge.textContent = `${headerCount} HEADER${headerCount === 1 ? '' : 'S'}`;
+        
+        prevPayloadBadge.textContent = parsed.payload ? "HAS BODY" : "NO BODY";
+        prevUrlText.textContent = parsed.url;
+      }
+    }
+
+    function applyParsedCurl(parsed) {
+      if (!parsed || parsed.error) return;
+
+      methodInput.value = parsed.method || "GET";
+      urlInput.value = parsed.url || "";
+      headersInput.value = parsed.headers || "";
+      payloadInput.value = parsed.payload || "";
+
+      if (parsed.method === "GET") {
+        payloadSection.classList.add("hidden");
+      } else {
+        payloadSection.classList.remove("hidden");
+      }
+
+      rememberUrl(parsed.url);
+      if (parsed.headers) rememberHeaders(parsed.headers);
+      if (parsed.payload && parsed.method !== "GET") rememberPayload(parsed.payload);
+
+      showToast(`✨ Imported cURL: ${parsed.method} request loaded`);
+    }
+
+    // Event Listeners for Modal
+    if (btnOpenCurlModal) btnOpenCurlModal.addEventListener("click", () => openCurlModal());
+    if (btnOpenCurlModalHeader) btnOpenCurlModalHeader.addEventListener("click", () => openCurlModal());
+    if (btnCloseCurlModal) btnCloseCurlModal.addEventListener("click", closeCurlModal);
+    if (btnCancelCurlModal) btnCancelCurlModal.addEventListener("click", closeCurlModal);
+
+    curlModalBackdrop.addEventListener("click", (e) => {
+      if (e.target === curlModalBackdrop) closeCurlModal();
+    });
+
+    curlCommandInput.addEventListener("input", updateCurlLivePreview);
+
+    if (btnClearCurlInput) {
+      btnClearCurlInput.addEventListener("click", () => {
+        curlCommandInput.value = "";
+        updateCurlLivePreview();
+        curlCommandInput.focus();
+      });
+    }
+
+    if (btnApplyCurlImport) {
+      btnApplyCurlImport.addEventListener("click", () => {
+        const text = curlCommandInput.value.trim();
+        if (!text) {
+          showToast("Please paste a cURL command first");
+          return;
+        }
+        const parsed = parseCurlCommand(text);
+        if (parsed.error) {
+          showToast(`Error: ${parsed.error}`);
+          return;
+        }
+        applyParsedCurl(parsed);
+        closeCurlModal();
+      });
+    }
+
+    // Modal Presets
+    const btnPresetGet = document.getElementById("btnPresetGet");
+    const btnPresetPost = document.getElementById("btnPresetPost");
+    const btnPresetCustom = document.getElementById("btnPresetCustom");
+
+    if (btnPresetGet) {
+      btnPresetGet.addEventListener("click", () => {
+        curlCommandInput.value = `curl 'https://jsonplaceholder.typicode.com/posts/1' \\\n  -H 'Accept: application/json' \\\n  -H 'Authorization: Bearer sample_jwt_token_12345'`;
+        updateCurlLivePreview();
+      });
+    }
+
+    if (btnPresetPost) {
+      btnPresetPost.addEventListener("click", () => {
+        curlCommandInput.value = `curl -X POST 'https://httpbin.org/post' \\\n  -H 'Content-Type: application/json' \\\n  --data-raw '{"title":"foo","body":"bar","userId":1}'`;
+        updateCurlLivePreview();
+      });
+    }
+
+    if (btnPresetCustom) {
+      btnPresetCustom.addEventListener("click", () => {
+        curlCommandInput.value = `curl -X POST 'https://jsonplaceholder.typicode.com/posts' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Accept: application/json' \\\n  -H 'actor-id: 18117' \\\n  -H 'site-id: 173' \\\n  -H 'space-id: 16658' \\\n  --data-raw '{\\n  "name": "Kailash Joshi",\\n  "phone": "6122171798",\\n  "type": "SMS"\\n}'`;
+        updateCurlLivePreview();
+      });
+    }
+
+    // Copy as cURL button
+    if (btnCopyAsCurl) {
+      btnCopyAsCurl.addEventListener("click", () => {
+        const method = methodInput.value;
+        const url = urlInput.value.trim();
+        const headers = headersInput.value;
+        const payload = payloadInput.value;
+
+        if (!url) {
+          showToast("Please enter an endpoint URL first");
+          urlInput.focus();
+          return;
+        }
+
+        const curlCmd = generateCurlCommand(method, url, headers, payload);
+        navigator.clipboard.writeText(curlCmd).then(() => {
+          showToast("📋 Executable cURL command copied to clipboard!");
+        }).catch(() => {
+          openCurlModal(curlCmd);
+        });
+      });
+    }
+
+    // Smart Paste in URL Bar: Intercept if user pastes a cURL command into the URL input
+    urlInput.addEventListener("paste", (e) => {
+      const pastedData = (e.clipboardData || window.clipboardData).getData("text");
+      if (pastedData && (pastedData.trim().startsWith("curl ") || (pastedData.includes("curl ") && pastedData.includes("http")))) {
+        e.preventDefault();
+        const parsed = parseCurlCommand(pastedData);
+        if (!parsed.error) {
+          applyParsedCurl(parsed);
+        } else {
+          openCurlModal(pastedData);
+        }
+      }
+    });
+
+    // Keyboard Shortcuts: Alt+I for Import cURL, Alt+C for Copy cURL, Escape to close modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && curlModalBackdrop.classList.contains("show")) {
+        e.preventDefault();
+        closeCurlModal();
+      }
+      if (curlModalBackdrop.classList.contains("show") && (e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (btnApplyCurlImport) btnApplyCurlImport.click();
+      }
+      if (e.altKey && (e.key === "i" || e.key === "I")) {
+        e.preventDefault();
+        openCurlModal();
+      }
+      if (e.altKey && (e.key === "c" || e.key === "C")) {
+        e.preventDefault();
+        if (btnCopyAsCurl) btnCopyAsCurl.click();
+      }
+    });
 
     // Initialize views
     renderUrlDropdown();
