@@ -480,13 +480,13 @@
       flex: 1 1 auto;
       min-height: 80px;
       gap: 4px;
+      position: relative;
     }
 
-    #payloadSection textarea.code-editor {
+    #payloadSection .code-editor-wrapper {
       flex: 1;
       width: 100%;
       min-height: 80px;
-      resize: vertical !important;
       box-sizing: border-box;
     }
 
@@ -697,6 +697,44 @@
       border-color: var(--accent-primary);
     }
 
+    .btn-beautify {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: #a855f7;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-beautify:hover {
+      background: var(--bg-hover);
+      border-color: #a855f7;
+      color: #c084fc;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(168, 85, 247, 0.25);
+    }
+
+    .btn-beautify:active {
+      transform: translateY(0);
+    }
+
+    [data-theme="light"] .btn-beautify {
+      color: #7c3aed;
+    }
+
+    [data-theme="light"] .btn-beautify:hover {
+      color: #6d28d9;
+      border-color: #7c3aed;
+      background: #f5f3ff;
+    }
+
     .btn-new-req {
       background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
       color: #ffffff;
@@ -816,7 +854,90 @@
       font-size: 11px;
     }
 
-    /* Textareas */
+    /* Code Editor Overlay for Syntax Highlighting */
+    .code-editor-wrapper {
+      position: relative;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .code-editor-wrapper:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+
+    .code-editor-highlight,
+    textarea.code-editor-input,
+    textarea.code-editor {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.45;
+      tab-size: 2;
+      -moz-tab-size: 2;
+      box-sizing: border-box;
+      letter-spacing: normal;
+      font-variant-ligatures: none;
+    }
+
+    .code-editor-highlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: 0;
+      padding: 8px 10px;
+      background: transparent;
+      color: var(--text-primary);
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      border: none;
+    }
+
+    textarea.code-editor-input {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 8px 10px;
+      background: transparent !important;
+      color: transparent !important;
+      caret-color: var(--text-primary);
+      border: none !important;
+      outline: none !important;
+      resize: none;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    textarea.code-editor-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    textarea.code-editor-input::selection {
+      background: rgba(59, 130, 246, 0.35);
+      color: transparent;
+    }
+
+    textarea.code-editor-input::-moz-selection {
+      background: rgba(59, 130, 246, 0.35);
+      color: transparent;
+    }
+
+    /* Standard Textareas (e.g. Headers) */
     textarea.code-editor {
       width: 100%;
       min-height: 105px;
@@ -825,11 +946,8 @@
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
       color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      line-height: 1.45;
-      resize: vertical;
       outline: none;
+      resize: vertical;
       transition: border-color 0.2s;
     }
 
@@ -1085,6 +1203,36 @@
 
     .hl-punctuation {
       color: #94a3b8;
+    }
+
+    /* JSON Colors (Light Mode) */
+    [data-theme="light"] .hl-key {
+      color: #1d4ed8;
+      font-weight: 600;
+    }
+
+    [data-theme="light"] .hl-string {
+      color: #15803d;
+    }
+
+    [data-theme="light"] .hl-number {
+      color: #c2410c;
+      font-weight: 600;
+    }
+
+    [data-theme="light"] .hl-boolean {
+      color: #be185d;
+      font-weight: 600;
+    }
+
+    [data-theme="light"] .hl-null {
+      color: #7e22ce;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    [data-theme="light"] .hl-punctuation {
+      color: #475569;
     }
 
     /* Collapsible JSON Tree Styles */
@@ -1647,26 +1795,34 @@
               <span class="field-title">
                 📦 JSON Payload
               </span>
-              <!-- Recent Payloads Dropdown -->
-              <div class="smart-dropdown">
-                <button type="button" class="btn-recents" id="btnPayloadDropdown">
-                  🕒 Recent Payloads ▾
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button type="button" class="btn-beautify" id="btnBeautifyPayload" title="Beautify / Format JSON Payload (Alt+F)">
+                  ✨ Beautify
                 </button>
-                <div class="dropdown-menu" id="payloadDropdownMenu">
-                  <div class="dropdown-header">
-                    <span>Recent Payloads</span>
-                    <button type="button" class="btn-sm" id="btnClearPayloadsHistory"
-                      style="padding: 1px 5px; font-size: 9px;">Clear</button>
+                <!-- Recent Payloads Dropdown -->
+                <div class="smart-dropdown">
+                  <button type="button" class="btn-recents" id="btnPayloadDropdown">
+                    🕒 Recent Payloads ▾
+                  </button>
+                  <div class="dropdown-menu" id="payloadDropdownMenu">
+                    <div class="dropdown-header">
+                      <span>Recent Payloads</span>
+                      <button type="button" class="btn-sm" id="btnClearPayloadsHistory"
+                        style="padding: 1px 5px; font-size: 9px;">Clear</button>
+                    </div>
+                    <div id="payloadDropdownList"></div>
                   </div>
-                  <div id="payloadDropdownList"></div>
                 </div>
               </div>
             </div>
 
-            <textarea id="payload" class="code-editor" placeholder='{
+            <div class="code-editor-wrapper" id="payloadEditorWrapper">
+              <pre class="code-editor-highlight" id="payloadHighlight" aria-hidden="true"></pre>
+              <textarea id="payload" class="code-editor-input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder='{
   "name": "John",
   "email": "john@example.com"
 }'></textarea>
+            </div>
           </div>
 
           <!-- Inter-field Resizer Divider -->
@@ -2138,6 +2294,7 @@ space-id: 16658"></textarea>
           if (e.target.closest(".btn-del")) return;
           const idx = parseInt(itemEl.dataset.idx);
           payloadInput.value = state.payloads[idx];
+          updatePayloadHighlight();
           payloadDropdownMenu.classList.remove("show");
           showToast("Loaded recent payload");
         });
@@ -2168,6 +2325,152 @@ space-id: 16658"></textarea>
       renderPayloadDropdown();
       showToast("Cleared recent payloads");
     });
+
+    // =========================================================================
+    // JSON SYNTAX HIGHLIGHTER & BEAUTIFIER
+    // =========================================================================
+
+    const payloadHighlight = document.getElementById("payloadHighlight");
+    const payloadEditorWrapper = document.getElementById("payloadEditorWrapper");
+
+    function highlightJsonCode(text) {
+      if (!text) return '';
+
+      const hasTrailingNewline = text.endsWith('\n');
+
+      // Tokenize JSON: Strings (with object keys), Numbers, Booleans, Nulls, Brackets, Comments
+      const tokenRegex = /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(?:true|false|null|True|False|None)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?|[{}[\],:]|(?:\/\/.*|\/\*[\s\S]*?\*\/))/g;
+
+      let result = text.replace(tokenRegex, function (match) {
+        if (match.startsWith('//') || match.startsWith('/*')) {
+          return `<span style="color: var(--text-muted); font-style: italic;">${escapeHtml(match)}</span>`;
+        }
+        if (match.startsWith('"')) {
+          if (/:$/.test(match.trim())) {
+            const colonIndex = match.lastIndexOf(':');
+            const keyPart = match.substring(0, colonIndex);
+            const colonPart = match.substring(colonIndex);
+            return `<span class="hl-key">${escapeHtml(keyPart)}</span><span class="hl-punctuation">${escapeHtml(colonPart)}</span>`;
+          } else {
+            return `<span class="hl-string">${escapeHtml(match)}</span>`;
+          }
+        } else if (match === 'true' || match === 'false' || match === 'True' || match === 'False') {
+          return `<span class="hl-boolean">${escapeHtml(match)}</span>`;
+        } else if (match === 'null' || match === 'None') {
+          return `<span class="hl-null">${escapeHtml(match)}</span>`;
+        } else if (/^-?\d/.test(match)) {
+          return `<span class="hl-number">${escapeHtml(match)}</span>`;
+        } else if (/[{}[\],:]/.test(match)) {
+          return `<span class="hl-punctuation">${escapeHtml(match)}</span>`;
+        }
+        return escapeHtml(match);
+      });
+
+      if (hasTrailingNewline) {
+        result += ' ';
+      }
+
+      return result;
+    }
+
+    function updatePayloadHighlight() {
+      if (!payloadInput || !payloadHighlight) return;
+      payloadHighlight.innerHTML = highlightJsonCode(payloadInput.value);
+      payloadHighlight.scrollTop = payloadInput.scrollTop;
+      payloadHighlight.scrollLeft = payloadInput.scrollLeft;
+    }
+
+    if (payloadInput && payloadHighlight) {
+      payloadInput.addEventListener("input", updatePayloadHighlight);
+      payloadInput.addEventListener("scroll", () => {
+        payloadHighlight.scrollTop = payloadInput.scrollTop;
+        payloadHighlight.scrollLeft = payloadInput.scrollLeft;
+      });
+    }
+
+    function beautifyJsonText(rawText) {
+      if (!rawText || !rawText.trim()) {
+        return { success: false, error: "JSON payload is empty." };
+      }
+
+      const text = rawText.trim();
+
+      // 1. Strict standard JSON parse
+      try {
+        const parsed = JSON.parse(text);
+        return { success: true, formatted: JSON.stringify(parsed, null, 2) };
+      } catch (err1) {
+        // 2. Relaxed JSON parsing for common loose syntax
+        // (Python True/False/None, trailing commas, single-quoted keys/strings)
+        try {
+          let relaxed = text
+            // Trailing commas before } or ]
+            .replace(/,\s*([}\]])/g, '$1')
+            // Python booleans and None
+            .replace(/:\s*True\b/g, ': true')
+            .replace(/:\s*False\b/g, ': false')
+            .replace(/:\s*None\b/g, ': null')
+            .replace(/\[\s*True\b/g, '[true')
+            .replace(/\[\s*False\b/g, '[false')
+            .replace(/\[\s*None\b/g, '[null');
+
+          // Single quoted keys and string values
+          relaxed = relaxed.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'\s*:/g, '"$1":');
+          relaxed = relaxed.replace(/:\s*'([^'\\]*(?:\\.[^'\\]*)*)'/g, ': "$1"');
+          relaxed = relaxed.replace(/\[\s*'([^'\\]*(?:\\.[^'\\]*)*)'/g, '["$1"');
+          relaxed = relaxed.replace(/,\s*'([^'\\]*(?:\\.[^'\\]*)*)'/g, ', "$1"');
+
+          const parsed = JSON.parse(relaxed);
+          return { success: true, formatted: JSON.stringify(parsed, null, 2) };
+        } catch (err2) {
+          return { success: false, error: err1.message };
+        }
+      }
+    }
+
+    function beautifyPayload() {
+      if (!payloadInput) return;
+      const text = payloadInput.value;
+      if (!text || !text.trim()) {
+        showToast("⚠️ Payload is empty");
+        payloadInput.focus();
+        return;
+      }
+
+      const result = beautifyJsonText(text);
+      if (result.success) {
+        payloadInput.value = result.formatted;
+        updatePayloadHighlight();
+        showToast("✨ JSON payload beautified!");
+      } else {
+        showToast(`⚠️ Invalid JSON: ${result.error}`);
+      }
+    }
+
+    const btnBeautifyPayload = document.getElementById("btnBeautifyPayload");
+    if (btnBeautifyPayload) {
+      btnBeautifyPayload.addEventListener("click", beautifyPayload);
+    }
+
+    // Support Tab indentation in code editor textareas
+    function enableTabIndent(textarea) {
+      if (!textarea) return;
+      textarea.addEventListener("keydown", function (e) {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+          this.value = this.value.substring(0, start) + "  " + this.value.substring(end);
+          this.selectionStart = this.selectionEnd = start + 2;
+          if (textarea === payloadInput) {
+            updatePayloadHighlight();
+          }
+        }
+      });
+    }
+
+    enableTabIndent(payloadInput);
+    enableTabIndent(headersInput);
 
     // =========================================================================
     // REQUEST HISTORY SIDEBAR
@@ -2242,7 +2545,10 @@ space-id: 16658"></textarea>
           }
           if (item.url) urlInput.value = item.url;
           if (item.headers !== undefined) headersInput.value = item.headers;
-          if (item.payload !== undefined) payloadInput.value = item.payload;
+          if (item.payload !== undefined) {
+            payloadInput.value = item.payload;
+            updatePayloadHighlight();
+          }
           showToast(`Restored: ${item.method} ${item.url}`);
         });
 
@@ -2363,6 +2669,7 @@ space-id: 16658"></textarea>
       urlInput.value = "";
       headersInput.value = "";
       payloadInput.value = "";
+      updatePayloadHighlight();
       payloadSection.classList.add("hidden");
 
       currentRawResponseText = "";
@@ -2889,7 +3196,8 @@ space-id: 16658"></textarea>
       fieldResizer.addEventListener("pointerdown", (e) => {
         isFieldDragging = true;
         startY = e.clientY;
-        startPayloadHeight = payloadInput.offsetHeight;
+        const wrapper = document.getElementById("payloadEditorWrapper");
+        startPayloadHeight = wrapper ? wrapper.offsetHeight : payloadInput.offsetHeight;
         startHeadersHeight = headersInput.offsetHeight;
         fieldResizer.setPointerCapture(e.pointerId);
         fieldResizer.classList.add("dragging");
@@ -2902,8 +3210,14 @@ space-id: 16658"></textarea>
         const deltaY = e.clientY - startY;
         const newPayloadHeight = Math.max(60, startPayloadHeight + deltaY);
         const newHeadersHeight = Math.max(45, startHeadersHeight - deltaY);
-        payloadInput.style.height = `${newPayloadHeight}px`;
-        payloadInput.style.flex = "none";
+        const wrapper = document.getElementById("payloadEditorWrapper");
+        if (wrapper) {
+          wrapper.style.height = `${newPayloadHeight}px`;
+          wrapper.style.flex = "none";
+        } else {
+          payloadInput.style.height = `${newPayloadHeight}px`;
+          payloadInput.style.flex = "none";
+        }
         headersInput.style.height = `${newHeadersHeight}px`;
       });
 
@@ -3223,6 +3537,7 @@ space-id: 16658"></textarea>
       urlInput.value = parsed.url || "";
       headersInput.value = parsed.headers || "";
       payloadInput.value = parsed.payload || "";
+      updatePayloadHighlight();
 
       if (parsed.method === "GET") {
         payloadSection.classList.add("hidden");
@@ -3355,6 +3670,10 @@ space-id: 16658"></textarea>
         e.preventDefault();
         if (btnCopyAsCurl) btnCopyAsCurl.click();
       }
+      if ((e.altKey && (e.key === "f" || e.key === "F")) || (e.shiftKey && e.altKey && (e.key === "f" || e.key === "F"))) {
+        e.preventDefault();
+        beautifyPayload();
+      }
     });
 
     // Initialize views
@@ -3364,6 +3683,7 @@ space-id: 16658"></textarea>
     renderHeadersDropdown();
     renderPayloadDropdown();
     renderHistoryList();
+    updatePayloadHighlight();
 
   </script>
 </body>
