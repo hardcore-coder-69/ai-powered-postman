@@ -151,6 +151,7 @@
     }
 
     @media (max-width: 1024px) {
+
       html,
       body {
         height: auto;
@@ -541,18 +542,18 @@
       box-sizing: border-box;
     }
 
-    #payloadSection.hidden + .field-resizer-divider,
+    #payloadSection.hidden+.field-resizer-divider,
     #requestForm:has(#payloadSection.hidden) .field-resizer-divider {
       display: none !important;
     }
 
     #requestForm:has(#payloadSection.hidden) #headersSection,
-    #payloadSection.hidden ~ #headersSection {
+    #payloadSection.hidden~#headersSection {
       flex: 1 1 auto;
     }
 
     #requestForm:has(#payloadSection.hidden) #headersSection textarea.code-editor,
-    #payloadSection.hidden ~ #headersSection textarea.code-editor {
+    #payloadSection.hidden~#headersSection textarea.code-editor {
       flex: 1;
       height: 100%;
     }
@@ -1591,7 +1592,7 @@
               </span> -->
               <div style="display: flex; align-items: center; gap: 6px;">
                 <button type="button" class="btn-new-req" id="btnQuickNew" title="Start new blank request (Alt+N)">
-                  ✨ Add New Request
+                  ＋ New Request
                 </button>
                 <button type="button" class="btn-curl-import" id="btnOpenCurlModal" title="Import cURL command (Alt+I)">
                   📥 Import cURL
