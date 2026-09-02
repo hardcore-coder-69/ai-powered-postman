@@ -452,6 +452,50 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+    }
+
+    #payloadSection {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 120px;
+      gap: 4px;
+    }
+
+    #payloadSection textarea.code-editor {
+      flex: 1;
+      height: 100%;
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    #headersSection {
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 auto;
+      gap: 4px;
+    }
+
+    #headersSection textarea.code-editor {
+      height: 72px;
+      min-height: 52px;
+      max-height: 150px;
+      resize: vertical;
+    }
+
+    #requestForm:has(#payloadSection.hidden) #headersSection,
+    #payloadSection.hidden ~ #headersSection {
+      flex: 1 1 auto;
+    }
+
+    #requestForm:has(#payloadSection.hidden) #headersSection textarea.code-editor,
+    #payloadSection.hidden ~ #headersSection textarea.code-editor {
+      flex: 1;
+      height: 100%;
+      max-height: none;
     }
 
     /* URL Bar Row */
@@ -1532,36 +1576,7 @@
             </div>
           </div>
 
-          <!-- Headers Section (with top spacing) -->
-          <div class="field-section">
-            <div class="field-header">
-              <span class="field-title">
-                📑 Headers (optional)
-              </span>
-              <!-- Recent Headers Dropdown -->
-              <div class="smart-dropdown">
-                <button type="button" class="btn-recents" id="btnHeadersDropdown">
-                  🕒 Recent Headers ▾
-                </button>
-                <div class="dropdown-menu" id="headersDropdownMenu">
-                  <div class="dropdown-header">
-                    <span>Recent Headers</span>
-                    <button type="button" class="btn-sm" id="btnClearHeadersHistory"
-                      style="padding: 1px 5px; font-size: 9px;">Clear</button>
-                  </div>
-                  <div id="headersDropdownList"></div>
-                </div>
-              </div>
-            </div>
-
-            <textarea id="headers" class="code-editor" style="min-height: 85px;" placeholder="Accept: application/json
-Authorization: Bearer your-token
-actor-id: 18117
-site-id: 173
-space-id: 16658"></textarea>
-          </div>
-
-          <!-- Payload Section (with top spacing) -->
+          <!-- Payload Section (above Headers, takes available height) -->
           <div class="field-section" id="payloadSection">
             <div class="field-header">
               <span class="field-title">
@@ -1583,10 +1598,39 @@ space-id: 16658"></textarea>
               </div>
             </div>
 
-            <textarea id="payload" class="code-editor" style="min-height: 105px;" placeholder='{
+            <textarea id="payload" class="code-editor" placeholder='{
   "name": "John",
   "email": "john@example.com"
 }'></textarea>
+          </div>
+
+          <!-- Headers Section -->
+          <div class="field-section" id="headersSection">
+            <div class="field-header">
+              <span class="field-title">
+                📑 Headers (optional)
+              </span>
+              <!-- Recent Headers Dropdown -->
+              <div class="smart-dropdown">
+                <button type="button" class="btn-recents" id="btnHeadersDropdown">
+                  🕒 Recent Headers ▾
+                </button>
+                <div class="dropdown-menu" id="headersDropdownMenu">
+                  <div class="dropdown-header">
+                    <span>Recent Headers</span>
+                    <button type="button" class="btn-sm" id="btnClearHeadersHistory"
+                      style="padding: 1px 5px; font-size: 9px;">Clear</button>
+                  </div>
+                  <div id="headersDropdownList"></div>
+                </div>
+              </div>
+            </div>
+
+            <textarea id="headers" class="code-editor" placeholder="Accept: application/json
+Authorization: Bearer your-token
+actor-id: 18117
+site-id: 173
+space-id: 16658"></textarea>
           </div>
 
         </form>
@@ -2202,8 +2246,9 @@ space-id: 16658"></textarea>
       if (collapsed) {
         appLayout.classList.add("sidebar-collapsed");
         document.querySelectorAll(".btn-sidebar-toggle").forEach(el => {
-          el.style.opacity = "0.75";
+          el.style.opacity = "0.85";
           el.classList.remove("active");
+          el.innerHTML = "▶ History";
         });
         localStorage.setItem("pm_sidebar_collapsed", "true");
       } else {
@@ -2211,6 +2256,7 @@ space-id: 16658"></textarea>
         document.querySelectorAll(".btn-sidebar-toggle").forEach(el => {
           el.style.opacity = "1";
           el.classList.add("active");
+          el.innerHTML = "◀ History";
         });
         localStorage.setItem("pm_sidebar_collapsed", "false");
       }
@@ -2229,11 +2275,9 @@ space-id: 16658"></textarea>
     if (btnCollapseSidebar) btnCollapseSidebar.addEventListener("click", () => setSidebarCollapsed(true));
     if (btnSidebarPeek) btnSidebarPeek.addEventListener("click", () => setSidebarCollapsed(false));
 
-    // Restore saved sidebar state
+    // Restore saved sidebar state (initializes arrow direction properly)
     const savedSidebarState = localStorage.getItem("pm_sidebar_collapsed");
-    if (savedSidebarState === "true") {
-      setSidebarCollapsed(true);
-    }
+    setSidebarCollapsed(savedSidebarState === "true");
 
     // Keyboard shortcut Alt+H or Ctrl+B to toggle sidebar
     document.addEventListener("keydown", (e) => {
