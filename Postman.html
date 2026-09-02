@@ -67,11 +67,18 @@
       padding: 0;
     }
 
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
     body {
       font-family: var(--font-sans);
       background: var(--bg-primary);
       color: var(--text-primary);
-      min-height: 100vh;
+      height: 100vh;
+      max-height: 100vh;
       display: flex;
       flex-direction: column;
       line-height: 1.4;
@@ -144,6 +151,12 @@
     }
 
     @media (max-width: 1024px) {
+      html,
+      body {
+        height: auto;
+        overflow: auto;
+      }
+
       .app-layout {
         grid-template-columns: 1fr;
         height: auto;
@@ -359,6 +372,7 @@
       gap: 0;
       padding: 8px 10px;
       height: 100%;
+      min-height: 0;
       overflow: hidden;
       box-sizing: border-box;
       position: relative;
@@ -372,20 +386,22 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      overflow-y: auto;
       height: 100%;
+      min-height: 0;
       min-width: 260px;
       box-sizing: border-box;
     }
 
     #requestPanel {
       flex: 1 1 54%;
+      overflow-y: auto;
     }
 
     #responsePanel {
       flex: 1 1 46%;
       padding: 10px 12px;
       gap: 6px;
+      overflow: hidden;
     }
 
     /* Resizer Divider Bar between Panels */
@@ -451,7 +467,7 @@
     #requestForm {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       height: 100%;
       flex: 1;
       min-height: 0;
@@ -461,15 +477,53 @@
       display: flex;
       flex-direction: column;
       flex: 1 1 auto;
-      min-height: 120px;
+      min-height: 80px;
       gap: 4px;
     }
 
     #payloadSection textarea.code-editor {
       flex: 1;
-      height: 100%;
-      min-height: 110px;
-      resize: vertical;
+      width: 100%;
+      min-height: 80px;
+      resize: vertical !important;
+      box-sizing: border-box;
+    }
+
+    /* Inter-field Resizer Divider between Payload and Headers */
+    .field-resizer-divider {
+      height: 8px;
+      margin: 1px 0;
+      cursor: row-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 3px;
+      transition: all 0.15s ease;
+      user-select: none;
+      z-index: 5;
+    }
+
+    .field-resizer-divider::after {
+      content: '';
+      width: 32px;
+      height: 3px;
+      background: var(--border-color);
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    .field-resizer-divider:hover::after,
+    .field-resizer-divider.dragging::after {
+      background: var(--accent-primary);
+      width: 52px;
+      height: 4px;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    }
+
+    .field-resizer-divider:hover,
+    .field-resizer-divider.dragging {
+      background: rgba(59, 130, 246, 0.12);
     }
 
     #headersSection {
@@ -480,10 +534,16 @@
     }
 
     #headersSection textarea.code-editor {
+      width: 100%;
       height: 72px;
-      min-height: 52px;
-      max-height: 150px;
-      resize: vertical;
+      min-height: 48px;
+      resize: vertical !important;
+      box-sizing: border-box;
+    }
+
+    #payloadSection.hidden + .field-resizer-divider,
+    #requestForm:has(#payloadSection.hidden) .field-resizer-divider {
+      display: none !important;
     }
 
     #requestForm:has(#payloadSection.hidden) #headersSection,
@@ -495,7 +555,6 @@
     #payloadSection.hidden ~ #headersSection textarea.code-editor {
       flex: 1;
       height: 100%;
-      max-height: none;
     }
 
     /* URL Bar Row */
@@ -852,10 +911,12 @@
 
     .response-body-wrapper {
       position: relative;
-      flex: 1;
-      min-height: 180px;
+      flex: 1 1 0;
+      height: 100%;
+      min-height: 0;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     pre.response-output {
@@ -867,12 +928,15 @@
       font-family: var(--font-mono);
       font-size: 11px;
       line-height: 1.42;
-      flex: 1;
-      overflow: auto;
+      flex: 1 1 0;
+      height: 100%;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: auto;
       white-space: pre-wrap;
       word-break: break-word;
-      min-height: 180px;
-      resize: vertical;
+      box-sizing: border-box;
+      resize: none;
     }
 
     [data-theme="light"] pre.response-output {
@@ -1603,6 +1667,9 @@
   "email": "john@example.com"
 }'></textarea>
           </div>
+
+          <!-- Inter-field Resizer Divider -->
+          <div class="field-resizer-divider" id="fieldResizer" title="Drag to resize Payload and Headers"></div>
 
           <!-- Headers Section -->
           <div class="field-section" id="headersSection">
@@ -2808,6 +2875,51 @@ space-id: 16658"></textarea>
 
       resizer.addEventListener("pointerup", stopDragging);
       resizer.addEventListener("pointercancel", stopDragging);
+    }
+
+    // Inter-field Resizer between Payload and Headers
+    const fieldResizer = document.getElementById("fieldResizer");
+    if (fieldResizer && payloadInput && headersInput) {
+      let isFieldDragging = false;
+      let startY = 0;
+      let startPayloadHeight = 0;
+      let startHeadersHeight = 0;
+
+      fieldResizer.addEventListener("pointerdown", (e) => {
+        isFieldDragging = true;
+        startY = e.clientY;
+        startPayloadHeight = payloadInput.offsetHeight;
+        startHeadersHeight = headersInput.offsetHeight;
+        fieldResizer.setPointerCapture(e.pointerId);
+        fieldResizer.classList.add("dragging");
+        document.body.style.cursor = "row-resize";
+        document.body.style.userSelect = "none";
+      });
+
+      fieldResizer.addEventListener("pointermove", (e) => {
+        if (!isFieldDragging) return;
+        const deltaY = e.clientY - startY;
+        const newPayloadHeight = Math.max(60, startPayloadHeight + deltaY);
+        const newHeadersHeight = Math.max(45, startHeadersHeight - deltaY);
+        payloadInput.style.height = `${newPayloadHeight}px`;
+        payloadInput.style.flex = "none";
+        headersInput.style.height = `${newHeadersHeight}px`;
+      });
+
+      const stopFieldDragging = (e) => {
+        if (isFieldDragging) {
+          isFieldDragging = false;
+          try {
+            fieldResizer.releasePointerCapture(e.pointerId);
+          } catch (err) { }
+          fieldResizer.classList.remove("dragging");
+          document.body.style.cursor = "";
+          document.body.style.userSelect = "";
+        }
+      };
+
+      fieldResizer.addEventListener("pointerup", stopFieldDragging);
+      fieldResizer.addEventListener("pointercancel", stopFieldDragging);
     }
 
     // =========================================================================
