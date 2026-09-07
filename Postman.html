@@ -1831,7 +1831,7 @@
 
               <div class="url-input-container">
                 <input type="url" id="url" class="url-input" placeholder="https://example.com/api/test"
-                  list="urlDatalist" required />
+                  list="urlDatalist" required title="" />
                 <datalist id="urlDatalist"></datalist>
               </div>
 
@@ -2165,6 +2165,23 @@ space-id: 16658"></textarea>
     });
 
     // =========================================================================
+    // URL TITLE HOVER SYNC
+    // =========================================================================
+
+    function updateUrlTitle() {
+      if (urlInput) {
+        urlInput.title = urlInput.value || "";
+      }
+    }
+
+    if (urlInput) {
+      urlInput.addEventListener("input", updateUrlTitle);
+      urlInput.addEventListener("change", updateUrlTitle);
+      urlInput.addEventListener("mouseenter", updateUrlTitle);
+      updateUrlTitle();
+    }
+
+    // =========================================================================
     // RECENT URLS
     // =========================================================================
 
@@ -2208,6 +2225,7 @@ space-id: 16658"></textarea>
           if (e.target.closest(".btn-del")) return;
           const idx = parseInt(itemEl.dataset.idx);
           urlInput.value = state.urls[idx];
+          updateUrlTitle();
           urlDropdownMenu.classList.remove("show");
           showToast("Loaded recent URL");
         });
@@ -2600,7 +2618,10 @@ space-id: 16658"></textarea>
             if (item.method === "GET") payloadSection.classList.add("hidden");
             else payloadSection.classList.remove("hidden");
           }
-          if (item.url) urlInput.value = item.url;
+          if (item.url) {
+            urlInput.value = item.url;
+            updateUrlTitle();
+          }
           if (item.headers !== undefined) headersInput.value = item.headers;
           if (item.payload !== undefined) {
             payloadInput.value = item.payload;
@@ -2724,6 +2745,7 @@ space-id: 16658"></textarea>
       methodInput.value = "GET";
       updateMethodColor();
       urlInput.value = "";
+      updateUrlTitle();
       headersInput.value = "";
       payloadInput.value = "";
       updatePayloadHighlight();
@@ -3650,6 +3672,7 @@ space-id: 16658"></textarea>
       methodInput.value = parsed.method || "GET";
       updateMethodColor();
       urlInput.value = parsed.url || "";
+      updateUrlTitle();
       headersInput.value = parsed.headers || "";
       payloadInput.value = parsed.payload || "";
       updatePayloadHighlight();
