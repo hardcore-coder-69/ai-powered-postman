@@ -322,6 +322,16 @@
       color: #ef4444;
     }
 
+    .status-saved {
+      background: rgba(59, 130, 246, 0.2);
+      color: #38bdf8;
+    }
+
+    [data-theme="light"] .status-saved {
+      background: rgba(37, 99, 235, 0.15);
+      color: #2563eb;
+    }
+
     .history-url {
       font-family: var(--font-mono);
       font-size: 10px;
@@ -646,6 +656,48 @@
       color: var(--text-muted);
       cursor: not-allowed;
       box-shadow: none;
+    }
+
+    .btn-save {
+      height: 32px;
+      padding: 0 13px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 11.5px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-save:hover {
+      background: var(--bg-hover);
+      border-color: #3b82f6;
+      color: #38bdf8;
+      transform: translateY(-1px);
+    }
+
+    .btn-save:active {
+      transform: translateY(0);
+    }
+
+    [data-theme="light"] .btn-save {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #1e293b;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="light"] .btn-save:hover {
+      background: #f1f5f9;
+      border-color: #2563eb;
+      color: #2563eb;
     }
 
     /* Field Sections with ample breathing room */
@@ -1786,6 +1838,9 @@
               <button type="submit" id="submitBtn" class="btn-send">
                 <span>Send</span> ➔
               </button>
+              <button type="button" id="btnSaveReq" class="btn-save" title="Save Request (Ctrl+S)">
+                <span>Save</span> 💾
+              </button>
             </div>
           </div>
 
@@ -2055,6 +2110,7 @@ space-id: 16658"></textarea>
     const payloadSection = document.getElementById("payloadSection");
     const responseElement = document.getElementById("response");
     const submitBtn = document.getElementById("submitBtn");
+    const btnSaveReq = document.getElementById("btnSaveReq");
     const toast = document.getElementById("toast");
 
     // History Sidebar
@@ -2498,7 +2554,7 @@ space-id: 16658"></textarea>
         if (!query) return true;
         return item.url.toLowerCase().includes(query) ||
           item.method.toLowerCase().includes(query) ||
-          (item.status && String(item.status).includes(query));
+          (item.status && String(item.status).toLowerCase().includes(query));
       });
 
       if (filtered.length === 0) {
@@ -2508,7 +2564,8 @@ space-id: 16658"></textarea>
 
       historyListContainer.innerHTML = filtered.map((item, idx) => {
         let statusClass = "status-2xx";
-        if (!item.status || item.status >= 500) statusClass = "status-5xx";
+        if (item.status === "SAVED") statusClass = "status-saved";
+        else if (!item.status || item.status >= 500) statusClass = "status-5xx";
         else if (item.status >= 400) statusClass = "status-4xx";
         else if (item.status === "ERR") statusClass = "status-err";
 
@@ -2805,11 +2862,15 @@ space-id: 16658"></textarea>
       }
     });
 
-    // Ctrl+Enter to send, Alt+N for New Request
+    // Ctrl+Enter to send, Ctrl+S to save, Alt+N for New Request
     document.addEventListener("keydown", (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
         form.requestSubmit();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+        e.preventDefault();
+        saveCurrentRequest();
       }
       if ((e.ctrlKey && e.altKey && (e.key === "n" || e.key === "N")) || (e.altKey && (e.key === "n" || e.key === "N"))) {
         e.preventDefault();
@@ -3122,6 +3183,60 @@ space-id: 16658"></textarea>
         submitBtn.innerHTML = '<span>Send</span> ➔';
       }
     });
+
+    // =========================================================================
+    // SAVE REQUEST LOGIC
+    // =========================================================================
+
+    function saveCurrentRequest() {
+      const method = methodInput.value;
+      const url = urlInput.value.trim();
+      const payloadText = payloadInput.value.trim();
+      const headersText = headersInput.value.trim();
+
+      if (!url) {
+        urlInput.reportValidity();
+        showToast("⚠️ Please enter a URL to save");
+        urlInput.focus();
+        return;
+      }
+
+      // Auto-save into Recents! (just like send does)
+      rememberUrl(url);
+      if (headersText) rememberHeaders(headersText);
+      if (method !== "GET" && payloadText) rememberPayload(payloadText);
+
+      // Save into Request History in sidebar (just like send does)
+      const sizeInBytes = payloadText ? new Blob([payloadText]).size : 0;
+      const sizeFormatted = sizeInBytes > 1024 ? (sizeInBytes / 1024).toFixed(1) + " KB" : sizeInBytes + " B";
+
+      logHistory({
+        id: Date.now(),
+        timestamp: Date.now(),
+        method: method,
+        url: url,
+        headers: headersText,
+        payload: payloadText,
+        status: "SAVED",
+        statusText: "Saved Request",
+        duration: 0,
+        size: sizeFormatted
+      });
+
+      // Visual feedback on the Save button
+      if (btnSaveReq) {
+        btnSaveReq.innerHTML = '<span>Saved!</span> ✓';
+        setTimeout(() => {
+          btnSaveReq.innerHTML = '<span>Save</span> 💾';
+        }, 1200);
+      }
+
+      showToast(`✓ Saved: ${method} ${url}`);
+    }
+
+    if (btnSaveReq) {
+      btnSaveReq.addEventListener("click", saveCurrentRequest);
+    }
 
     // =========================================================================
     // PANEL RESIZER INTERACTION
