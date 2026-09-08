@@ -3095,7 +3095,7 @@ space-id: 16658"></textarea>
         .replace(/'/g, '&#039;');
     }
 
-    function buildJsonTreeHtml(data, depth = 0) {
+    function buildJsonTreeHtml(data) {
       if (data === null) {
         return '<span class="hl-null">null</span>';
       }
@@ -3117,10 +3117,9 @@ space-id: 16658"></textarea>
         let rowsHtml = '';
         for (let i = 0; i < data.length; i++) {
           const isLast = i === data.length - 1;
-          rowsHtml += `<div class="json-row">${buildJsonTreeHtml(data[i], depth + 1)}${isLast ? '' : '<span class="hl-punctuation">,</span>'}</div>`;
+          rowsHtml += `<div class="json-row">${buildJsonTreeHtml(data[i])}${isLast ? '' : '<span class="hl-punctuation">,</span>'}</div>`;
         }
-        const isCollapsed = depth > 0;
-        return `<span class="json-node${isCollapsed ? ' collapsed' : ''}" data-type="array">` +
+        return `<span class="json-node" data-type="array">` +
           `<span class="json-toggle" role="button" tabindex="0" title="Click to collapse / expand"><svg class="json-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></span>` +
           `<span class="hl-bracket open-bracket">[</span>` +
           `<span class="json-ellipsis" title="Click to expand">[ <span class="json-item-count">${countText}</span> ]</span>` +
@@ -3138,10 +3137,9 @@ space-id: 16658"></textarea>
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
           const isLast = i === keys.length - 1;
-          rowsHtml += `<div class="json-row"><span class="hl-key">${escapeHtml(JSON.stringify(key))}</span><span class="hl-punctuation">: </span>${buildJsonTreeHtml(data[key], depth + 1)}${isLast ? '' : '<span class="hl-punctuation">,</span>'}</div>`;
+          rowsHtml += `<div class="json-row"><span class="hl-key">${escapeHtml(JSON.stringify(key))}</span><span class="hl-punctuation">: </span>${buildJsonTreeHtml(data[key])}${isLast ? '' : '<span class="hl-punctuation">,</span>'}</div>`;
         }
-        const isCollapsed = depth > 0;
-        return `<span class="json-node${isCollapsed ? ' collapsed' : ''}" data-type="object">` +
+        return `<span class="json-node" data-type="object">` +
           `<span class="json-toggle" role="button" tabindex="0" title="Click to collapse / expand"><svg class="json-chevron" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></span>` +
           `<span class="hl-bracket open-bracket">{</span>` +
           `<span class="json-ellipsis" title="Click to expand">{ <span class="json-item-count">${countText}</span> }</span>` +
@@ -3265,11 +3263,6 @@ space-id: 16658"></textarea>
         responseTimePill.textContent = `⏱ ${duration} ms`;
         responseSizePill.textContent = `📦 ${sizeFormatted}`;
 
-        const hasNested = isJson && typeof responseData === 'object' && responseData !== null &&
-          (Array.isArray(responseData)
-            ? responseData.some(item => item !== null && typeof item === 'object')
-            : Object.values(responseData).some(val => val !== null && typeof val === 'object'));
-
         const headerHtml = `
 <div class="res-meta-line">
   <div class="res-meta-url-row">
@@ -3283,7 +3276,7 @@ space-id: 16658"></textarea>
   <div class="res-meta-toolbar">
     ${isJson ? `
       <button type="button" class="btn-res-action btn-toggle-collapse" title="Toggle Expand / Collapse JSON objects">
-        ${hasNested ? '▼ Expand' : '▶ Collapse'}
+        ▶ Collapse
       </button>
     ` : ''}
     <button type="button" class="btn-res-action btn-copy-res" title="Copy response to clipboard">
