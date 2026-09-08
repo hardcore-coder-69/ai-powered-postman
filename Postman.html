@@ -523,88 +523,122 @@
       min-height: 0;
     }
 
-    #payloadSection {
+    /* Form Container with clean spacing between fields */
+    #requestForm {
       display: flex;
       flex-direction: column;
-      flex: 1 1 auto;
-      min-height: 80px;
+      gap: 6px;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Request Tabs Header */
+    .request-tabs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding: 3px 0 6px 0;
+      margin-top: 2px;
+      gap: 8px;
+    }
+
+    .request-tabs {
+      display: flex;
+      align-items: center;
       gap: 4px;
+    }
+
+    .request-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 11px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .request-tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .request-tab-btn.active {
+      color: var(--accent-primary);
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.3);
+      font-weight: 600;
+    }
+
+    [data-theme="light"] .request-tab-btn.active {
+      background: rgba(37, 99, 235, 0.08);
+      border-color: rgba(37, 99, 235, 0.25);
+      color: #2563eb;
+    }
+
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      padding: 0 5px;
+      height: 15px;
+      border-radius: 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .request-tab-btn.active .tab-badge {
+      border-color: rgba(59, 130, 246, 0.4);
+      color: var(--accent-primary);
+    }
+
+    .request-tab-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Tab Panes */
+    .request-tab-pane {
+      display: none;
+      flex-direction: column;
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0;
       position: relative;
     }
 
+    .request-tab-pane.active {
+      display: flex;
+    }
+
     #payloadSection .code-editor-wrapper {
-      flex: 1;
+      flex: 1 1 auto;
       width: 100%;
-      min-height: 80px;
+      height: 100%;
+      min-height: 0;
       box-sizing: border-box;
-    }
-
-    /* Inter-field Resizer Divider between Payload and Headers */
-    .field-resizer-divider {
-      height: 8px;
-      margin: 1px 0;
-      cursor: row-resize;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      border-radius: 3px;
-      transition: all 0.15s ease;
-      user-select: none;
-      z-index: 5;
-    }
-
-    .field-resizer-divider::after {
-      content: '';
-      width: 32px;
-      height: 3px;
-      background: var(--border-color);
-      border-radius: 2px;
-      transition: all 0.2s ease;
-    }
-
-    .field-resizer-divider:hover::after,
-    .field-resizer-divider.dragging::after {
-      background: var(--accent-primary);
-      width: 52px;
-      height: 4px;
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
-    }
-
-    .field-resizer-divider:hover,
-    .field-resizer-divider.dragging {
-      background: rgba(59, 130, 246, 0.12);
-    }
-
-    #headersSection {
-      display: flex;
-      flex-direction: column;
-      flex: 0 0 auto;
-      gap: 4px;
     }
 
     #headersSection textarea.code-editor {
       width: 100%;
-      height: 72px;
-      min-height: 48px;
-      resize: vertical !important;
-      box-sizing: border-box;
-    }
-
-    #payloadSection.hidden+.field-resizer-divider,
-    #requestForm:has(#payloadSection.hidden) .field-resizer-divider {
-      display: none !important;
-    }
-
-    #requestForm:has(#payloadSection.hidden) #headersSection,
-    #payloadSection.hidden~#headersSection {
-      flex: 1 1 auto;
-    }
-
-    #requestForm:has(#payloadSection.hidden) #headersSection textarea.code-editor,
-    #payloadSection.hidden~#headersSection textarea.code-editor {
-      flex: 1;
       height: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      resize: none;
+      box-sizing: border-box;
     }
 
     /* URL Bar Row */
@@ -1887,51 +1921,41 @@
             </div>
           </div>
 
-          <!-- Payload Section (above Headers, takes available height) -->
-          <div class="field-section" id="payloadSection">
-            <div class="field-header">
-              <span class="field-title">
-                📦 JSON Payload
-              </span>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" class="btn-beautify" id="btnBeautifyPayload" title="Beautify / Format JSON Payload (Alt+F)">
-                  ✨ Beautify
+          <!-- Request Body Tabs Bar -->
+          <div class="request-tabs-header">
+            <div class="request-tabs">
+              <button type="button" class="request-tab-btn active" id="tabBtnPayload" data-tab="payload">
+                <span>📦 Payload</span>
+              </button>
+              <button type="button" class="request-tab-btn" id="tabBtnHeaders" data-tab="headers">
+                <span>📑 Headers</span>
+                <span class="tab-badge" id="headersTabBadge" style="display: none;">0</span>
+              </button>
+            </div>
+
+            <!-- Tab Contextual Actions for Payload -->
+            <div class="request-tab-actions" id="tabActionsPayload">
+              <button type="button" class="btn-beautify" id="btnBeautifyPayload" title="Beautify / Format JSON Payload (Alt+F)">
+                ✨ Beautify
+              </button>
+              <!-- Recent Payloads Dropdown -->
+              <div class="smart-dropdown">
+                <button type="button" class="btn-recents" id="btnPayloadDropdown">
+                  🕒 Recent Payloads ▾
                 </button>
-                <!-- Recent Payloads Dropdown -->
-                <div class="smart-dropdown">
-                  <button type="button" class="btn-recents" id="btnPayloadDropdown">
-                    🕒 Recent Payloads ▾
-                  </button>
-                  <div class="dropdown-menu" id="payloadDropdownMenu">
-                    <div class="dropdown-header">
-                      <span>Recent Payloads</span>
-                      <button type="button" class="btn-sm" id="btnClearPayloadsHistory"
-                        style="padding: 1px 5px; font-size: 9px;">Clear</button>
-                    </div>
-                    <div id="payloadDropdownList"></div>
+                <div class="dropdown-menu" id="payloadDropdownMenu">
+                  <div class="dropdown-header">
+                    <span>Recent Payloads</span>
+                    <button type="button" class="btn-sm" id="btnClearPayloadsHistory"
+                      style="padding: 1px 5px; font-size: 9px;">Clear</button>
                   </div>
+                  <div id="payloadDropdownList"></div>
                 </div>
               </div>
             </div>
 
-            <div class="code-editor-wrapper" id="payloadEditorWrapper">
-              <pre class="code-editor-highlight" id="payloadHighlight" aria-hidden="true"></pre>
-              <textarea id="payload" class="code-editor-input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder='{
-  "name": "John",
-  "email": "john@example.com"
-}'></textarea>
-            </div>
-          </div>
-
-          <!-- Inter-field Resizer Divider -->
-          <div class="field-resizer-divider" id="fieldResizer" title="Drag to resize Payload and Headers"></div>
-
-          <!-- Headers Section -->
-          <div class="field-section" id="headersSection">
-            <div class="field-header">
-              <span class="field-title">
-                📑 Headers (optional)
-              </span>
+            <!-- Tab Contextual Actions for Headers -->
+            <div class="request-tab-actions" id="tabActionsHeaders" style="display: none;">
               <!-- Recent Headers Dropdown -->
               <div class="smart-dropdown">
                 <button type="button" class="btn-recents" id="btnHeadersDropdown">
@@ -1947,7 +1971,21 @@
                 </div>
               </div>
             </div>
+          </div>
 
+          <!-- Tab Pane: JSON Payload -->
+          <div class="request-tab-pane active" id="payloadSection">
+            <div class="code-editor-wrapper" id="payloadEditorWrapper">
+              <pre class="code-editor-highlight" id="payloadHighlight" aria-hidden="true"></pre>
+              <textarea id="payload" class="code-editor-input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder='{
+  "name": "John",
+  "email": "john@example.com"
+}'></textarea>
+            </div>
+          </div>
+
+          <!-- Tab Pane: Headers -->
+          <div class="request-tab-pane" id="headersSection">
             <textarea id="headers" class="code-editor" placeholder="Accept: application/json
 Authorization: Bearer your-token
 actor-id: 18117
@@ -2658,8 +2696,8 @@ space-id: 16658"></textarea>
           if (item.method) {
             methodInput.value = item.method;
             updateMethodColor();
-            if (item.method === "GET") payloadSection.classList.add("hidden");
-            else payloadSection.classList.remove("hidden");
+            if (item.method === "GET") setActiveRequestTab("headers");
+            else setActiveRequestTab("payload");
           }
           if (item.url) {
             urlInput.value = item.url;
@@ -2700,6 +2738,31 @@ space-id: 16658"></textarea>
       showToast("History cleared");
     });
 
+    function updateMethodVisibility() {
+      if (!methodInput) return;
+      const method = (methodInput.value || 'GET').toUpperCase();
+      const isBodyAllowed = method !== 'GET' && method !== 'HEAD';
+
+      const tabBtnPayload = document.getElementById("tabBtnPayload");
+      const tabBtnHeaders = document.getElementById("tabBtnHeaders");
+
+      if (tabBtnPayload) {
+        tabBtnPayload.style.display = isBodyAllowed ? "inline-flex" : "none";
+      }
+
+      if (!isBodyAllowed) {
+        if (typeof setActiveRequestTab === "function") {
+          setActiveRequestTab("headers");
+        }
+      } else {
+        if (typeof setActiveRequestTab === "function") {
+          if (tabBtnHeaders && !tabBtnHeaders.classList.contains("active")) {
+            setActiveRequestTab("payload");
+          }
+        }
+      }
+    }
+
     function updateMethodColor() {
       if (!methodInput) return;
       const colors = {
@@ -2715,16 +2778,12 @@ space-id: 16658"></textarea>
       const color = colors[method] || '#f97316';
       methodInput.style.color = color;
       methodInput.style.borderColor = colors[method] ? `${color}88` : 'var(--border-color)';
+      updateMethodVisibility();
     }
 
     // Method change handler
     methodInput.addEventListener("change", () => {
       updateMethodColor();
-      if (methodInput.value === "GET") {
-        payloadSection.classList.add("hidden");
-      } else {
-        payloadSection.classList.remove("hidden");
-      }
     });
 
     // =========================================================================
@@ -2792,7 +2851,8 @@ space-id: 16658"></textarea>
       headersInput.value = "";
       payloadInput.value = "";
       updatePayloadHighlight();
-      payloadSection.classList.add("hidden");
+      setActiveRequestTab("headers");
+      updateHeadersBadge();
 
       currentRawResponseText = "";
 
@@ -3450,56 +3510,79 @@ space-id: 16658"></textarea>
       resizer.addEventListener("pointercancel", stopDragging);
     }
 
-    // Inter-field Resizer between Payload and Headers
-    const fieldResizer = document.getElementById("fieldResizer");
-    if (fieldResizer && payloadInput && headersInput) {
-      let isFieldDragging = false;
-      let startY = 0;
-      let startPayloadHeight = 0;
-      let startHeadersHeight = 0;
+    // =========================================================================
+    // REQUEST CONFIG TABS (PAYLOAD & HEADERS)
+    // =========================================================================
 
-      fieldResizer.addEventListener("pointerdown", (e) => {
-        isFieldDragging = true;
-        startY = e.clientY;
-        const wrapper = document.getElementById("payloadEditorWrapper");
-        startPayloadHeight = wrapper ? wrapper.offsetHeight : payloadInput.offsetHeight;
-        startHeadersHeight = headersInput.offsetHeight;
-        fieldResizer.setPointerCapture(e.pointerId);
-        fieldResizer.classList.add("dragging");
-        document.body.style.cursor = "row-resize";
-        document.body.style.userSelect = "none";
-      });
+    const tabBtnPayload = document.getElementById("tabBtnPayload");
+    const tabBtnHeaders = document.getElementById("tabBtnHeaders");
+    const headersTabBadge = document.getElementById("headersTabBadge");
+    const tabActionsPayload = document.getElementById("tabActionsPayload");
+    const tabActionsHeaders = document.getElementById("tabActionsHeaders");
 
-      fieldResizer.addEventListener("pointermove", (e) => {
-        if (!isFieldDragging) return;
-        const deltaY = e.clientY - startY;
-        const newPayloadHeight = Math.max(60, startPayloadHeight + deltaY);
-        const newHeadersHeight = Math.max(45, startHeadersHeight - deltaY);
-        const wrapper = document.getElementById("payloadEditorWrapper");
-        if (wrapper) {
-          wrapper.style.height = `${newPayloadHeight}px`;
-          wrapper.style.flex = "none";
-        } else {
-          payloadInput.style.height = `${newPayloadHeight}px`;
-          payloadInput.style.flex = "none";
-        }
-        headersInput.style.height = `${newHeadersHeight}px`;
-      });
+    let currentRequestTab = "payload";
 
-      const stopFieldDragging = (e) => {
-        if (isFieldDragging) {
-          isFieldDragging = false;
-          try {
-            fieldResizer.releasePointerCapture(e.pointerId);
-          } catch (err) { }
-          fieldResizer.classList.remove("dragging");
-          document.body.style.cursor = "";
-          document.body.style.userSelect = "";
-        }
-      };
+    function updateHeadersBadge() {
+      if (!headersTabBadge || !headersInput) return;
+      const lines = headersInput.value.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length > 0) {
+        headersTabBadge.textContent = lines.length;
+        headersTabBadge.style.display = "inline-flex";
+      } else {
+        headersTabBadge.style.display = "none";
+      }
+    }
 
-      fieldResizer.addEventListener("pointerup", stopFieldDragging);
-      fieldResizer.addEventListener("pointercancel", stopFieldDragging);
+    if (headersInput) {
+      headersInput.addEventListener("input", updateHeadersBadge);
+      updateHeadersBadge();
+    }
+
+    function setActiveRequestTab(tabName) {
+      currentRequestTab = tabName;
+      const isPayload = tabName === "payload";
+
+      if (tabBtnPayload) tabBtnPayload.classList.toggle("active", isPayload);
+      if (tabBtnHeaders) tabBtnHeaders.classList.toggle("active", !isPayload);
+
+      if (payloadSection) {
+        payloadSection.classList.toggle("active", isPayload);
+        payloadSection.style.height = "";
+        payloadSection.style.flex = "";
+      }
+      if (headersSection) {
+        headersSection.classList.toggle("active", !isPayload);
+        headersSection.style.height = "";
+        headersSection.style.flex = "";
+      }
+
+      const wrapper = document.getElementById("payloadEditorWrapper");
+      if (wrapper) {
+        wrapper.style.height = "";
+        wrapper.style.flex = "";
+      }
+      if (payloadInput) {
+        payloadInput.style.height = "";
+        payloadInput.style.flex = "";
+      }
+      if (headersInput) {
+        headersInput.style.height = "";
+        headersInput.style.flex = "";
+      }
+
+      if (tabActionsPayload) tabActionsPayload.style.display = isPayload ? "flex" : "none";
+      if (tabActionsHeaders) tabActionsHeaders.style.display = !isPayload ? "flex" : "none";
+
+      if (isPayload && typeof updatePayloadHighlight === "function") {
+        updatePayloadHighlight();
+      }
+    }
+
+    if (tabBtnPayload) {
+      tabBtnPayload.addEventListener("click", () => setActiveRequestTab("payload"));
+    }
+    if (tabBtnHeaders) {
+      tabBtnHeaders.addEventListener("click", () => setActiveRequestTab("headers"));
     }
 
     // =========================================================================
@@ -3806,10 +3889,11 @@ space-id: 16658"></textarea>
       updatePayloadHighlight();
 
       if (parsed.method === "GET") {
-        payloadSection.classList.add("hidden");
+        setActiveRequestTab("headers");
       } else {
-        payloadSection.classList.remove("hidden");
+        setActiveRequestTab("payload");
       }
+      updateHeadersBadge();
 
       rememberUrl(parsed.url);
       if (parsed.headers) rememberHeaders(parsed.headers);
@@ -3954,6 +4038,7 @@ space-id: 16658"></textarea>
     renderPayloadDropdown();
     renderHistoryList();
     updatePayloadHighlight();
+    updateHeadersBadge();
 
   </script>
 </body>
