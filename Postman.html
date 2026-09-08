@@ -453,6 +453,45 @@
       background: rgba(59, 130, 246, 0.08);
     }
 
+    /* Stacked (Top / Bottom) Workspace Layout */
+    .workspace.layout-stacked {
+      flex-direction: column;
+    }
+
+    .workspace.layout-stacked .panel {
+      min-width: 0;
+      width: 100%;
+      min-height: 120px;
+    }
+
+    .workspace.layout-stacked #requestPanel {
+      overflow-y: auto;
+    }
+
+    .workspace.layout-stacked #responsePanel {
+      overflow: hidden;
+    }
+
+    .workspace.layout-stacked .resizer-divider {
+      width: 100%;
+      height: 10px;
+      margin: 2px 0;
+      cursor: row-resize;
+      flex-direction: row;
+    }
+
+    .workspace.layout-stacked .resizer-divider::after {
+      width: 36px;
+      height: 3px;
+    }
+
+    .workspace.layout-stacked .resizer-divider:hover::after,
+    .workspace.layout-stacked .resizer-divider.dragging::after {
+      width: 52px;
+      height: 3px;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+    }
+
     @media (max-width: 900px) {
       .workspace {
         flex-direction: column;
@@ -1745,6 +1784,10 @@
     </div>
 
     <div class="header-actions">
+      <button class="btn-sm" id="btnLayoutToggle" title="Switch layout to Request on Top, Response on Bottom (Alt+V)">
+        <span id="layoutToggleIconWrapper" style="display: inline-flex; align-items: center;"></span>
+        <span id="layoutToggleText">Stacked View</span>
+      </button>
       <button class="btn-sm" id="btnThemeToggle" title="Toggle Light / Dark Mode">
         🌙 Theme
       </button>
@@ -3261,23 +3304,93 @@ space-id: 16658"></textarea>
     }
 
     // =========================================================================
-    // PANEL RESIZER INTERACTION
+    // PANEL RESIZER & WORKSPACE LAYOUT INTERACTION
     // =========================================================================
 
     const resizer = document.getElementById("panelResizer");
     const requestPanel = document.getElementById("requestPanel");
     const responsePanel = document.getElementById("responsePanel");
     const workspaceEl = document.querySelector(".workspace");
+    const btnLayoutToggle = document.getElementById("btnLayoutToggle");
+    const layoutToggleIconWrapper = document.getElementById("layoutToggleIconWrapper");
+    const layoutToggleText = document.getElementById("layoutToggleText");
 
-    const SAVED_SPLIT_KEY = "pm_panel_split_ratio";
-    const savedSplit = localStorage.getItem(SAVED_SPLIT_KEY);
-    if (savedSplit && requestPanel && responsePanel && window.innerWidth > 900) {
-      const ratio = parseFloat(savedSplit);
-      if (ratio >= 0.2 && ratio <= 0.8) {
+    const SAVED_SPLIT_KEY_H = "pm_panel_split_ratio_h";
+    const SAVED_SPLIT_KEY_V = "pm_panel_split_ratio_v";
+    const SAVED_SPLIT_LEGACY_KEY = "pm_panel_split_ratio";
+    const SAVED_LAYOUT_KEY = "pm_workspace_layout"; // "horizontal" | "stacked"
+
+    const iconStackedSVG = `
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="2" y="2" width="12" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="2" y="9" width="12" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+    `;
+    const iconColumnsSVG = `
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="2" y="2" width="5" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="9" y="2" width="5" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+    `;
+
+    function applySplitRatio(layout) {
+      if (!requestPanel || !responsePanel || window.innerWidth <= 900) return;
+      if (layout === "stacked") {
+        let savedV = localStorage.getItem(SAVED_SPLIT_KEY_V);
+        let ratio = savedV ? parseFloat(savedV) : 0.50;
+        if (isNaN(ratio) || ratio < 0.15 || ratio > 0.85) ratio = 0.50;
         requestPanel.style.flex = `0 0 ${ratio * 100}%`;
         responsePanel.style.flex = `1 1 ${(1 - ratio) * 100}%`;
+        if (resizer) resizer.title = "Drag to resize Request and Response panels (Top / Bottom)";
+      } else {
+        let savedH = localStorage.getItem(SAVED_SPLIT_KEY_H) || localStorage.getItem(SAVED_SPLIT_LEGACY_KEY);
+        let ratio = savedH ? parseFloat(savedH) : 0.54;
+        if (isNaN(ratio) || ratio < 0.2 || ratio > 0.8) ratio = 0.54;
+        requestPanel.style.flex = `0 0 ${ratio * 100}%`;
+        responsePanel.style.flex = `1 1 ${(1 - ratio) * 100}%`;
+        if (resizer) resizer.title = "Drag to resize Request and Response panels (Left / Right)";
       }
     }
+
+    function setLayout(layout, notify = false) {
+      const isStacked = layout === "stacked";
+      if (workspaceEl) {
+        workspaceEl.classList.toggle("layout-stacked", isStacked);
+      }
+      localStorage.setItem(SAVED_LAYOUT_KEY, layout);
+
+      if (layoutToggleIconWrapper && layoutToggleText && btnLayoutToggle) {
+        if (isStacked) {
+          layoutToggleIconWrapper.innerHTML = iconColumnsSVG;
+          layoutToggleText.textContent = "Side-by-Side";
+          btnLayoutToggle.title = "Switch to Side-by-Side View (Alt+V)";
+        } else {
+          layoutToggleIconWrapper.innerHTML = iconStackedSVG;
+          layoutToggleText.textContent = "Stacked View";
+          btnLayoutToggle.title = "Switch to Top / Bottom Stacked View (Alt+V)";
+        }
+      }
+
+      applySplitRatio(layout);
+
+      if (notify && typeof showToast === "function") {
+        showToast(isStacked ? "Switched to Top / Bottom view" : "Switched to Side-by-Side view");
+      }
+    }
+
+    function toggleLayout() {
+      const currentLayout = localStorage.getItem(SAVED_LAYOUT_KEY) || "horizontal";
+      const nextLayout = currentLayout === "stacked" ? "horizontal" : "stacked";
+      setLayout(nextLayout, true);
+    }
+
+    if (btnLayoutToggle) {
+      btnLayoutToggle.addEventListener("click", toggleLayout);
+    }
+
+    // Initialize layout from saved preference
+    const initialLayout = localStorage.getItem(SAVED_LAYOUT_KEY) || "horizontal";
+    setLayout(initialLayout, false);
 
     if (resizer && requestPanel && responsePanel && workspaceEl) {
       let isDragging = false;
@@ -3287,23 +3400,38 @@ space-id: 16658"></textarea>
         isDragging = true;
         resizer.setPointerCapture(e.pointerId);
         resizer.classList.add("dragging");
-        document.body.style.cursor = "col-resize";
+        const isStacked = workspaceEl.classList.contains("layout-stacked");
+        document.body.style.cursor = isStacked ? "row-resize" : "col-resize";
         document.body.style.userSelect = "none";
       });
 
       resizer.addEventListener("pointermove", (e) => {
         if (!isDragging) return;
+        const isStacked = workspaceEl.classList.contains("layout-stacked");
         const workspaceRect = workspaceEl.getBoundingClientRect();
-        const availableWidth = workspaceRect.width - 32 - resizer.offsetWidth;
-        const pointerX = e.clientX - workspaceRect.left - 16;
 
-        let ratio = pointerX / availableWidth;
-        ratio = Math.max(0.2, Math.min(0.8, ratio));
+        if (isStacked) {
+          const availableHeight = workspaceRect.height - 16 - resizer.offsetHeight;
+          const pointerY = e.clientY - workspaceRect.top - 8;
+          let ratio = pointerY / availableHeight;
+          ratio = Math.max(0.15, Math.min(0.85, ratio));
 
-        requestPanel.style.flex = `0 0 ${ratio * 100}%`;
-        responsePanel.style.flex = `1 1 ${(1 - ratio) * 100}%`;
+          requestPanel.style.flex = `0 0 ${ratio * 100}%`;
+          responsePanel.style.flex = `1 1 ${(1 - ratio) * 100}%`;
 
-        localStorage.setItem(SAVED_SPLIT_KEY, ratio.toFixed(4));
+          localStorage.setItem(SAVED_SPLIT_KEY_V, ratio.toFixed(4));
+        } else {
+          const availableWidth = workspaceRect.width - 24 - resizer.offsetWidth;
+          const pointerX = e.clientX - workspaceRect.left - 12;
+
+          let ratio = pointerX / availableWidth;
+          ratio = Math.max(0.2, Math.min(0.8, ratio));
+
+          requestPanel.style.flex = `0 0 ${ratio * 100}%`;
+          responsePanel.style.flex = `1 1 ${(1 - ratio) * 100}%`;
+
+          localStorage.setItem(SAVED_SPLIT_KEY_H, ratio.toFixed(4));
+        }
       });
 
       const stopDragging = (e) => {
@@ -3807,6 +3935,10 @@ space-id: 16658"></textarea>
       if (e.altKey && (e.key === "c" || e.key === "C")) {
         e.preventDefault();
         if (btnCopyAsCurl) btnCopyAsCurl.click();
+      }
+      if (e.altKey && (e.key === "v" || e.key === "V")) {
+        e.preventDefault();
+        toggleLayout();
       }
       if ((e.altKey && (e.key === "f" || e.key === "F")) || (e.shiftKey && e.altKey && (e.key === "f" || e.key === "F"))) {
         e.preventDefault();
