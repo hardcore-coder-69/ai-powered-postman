@@ -888,20 +888,19 @@
     }
 
     .dropdown-menu {
-      position: absolute;
-      top: calc(100% + 3px);
-      right: 0;
+      position: fixed;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
-      width: 330px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      width: 380px;
       max-height: 300px;
       overflow-y: auto;
-      z-index: 200;
-      padding: 4px;
+      z-index: 99999;
+      padding: 5px;
       display: none;
       animation: fadeIn 0.15s ease;
+      box-sizing: border-box;
     }
 
     .dropdown-menu.show {
@@ -954,9 +953,11 @@
       font-size: 10.5px;
       color: var(--text-primary);
       white-space: pre-wrap;
+      word-break: break-all;
+      overflow-wrap: anywhere;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-height: 42px;
+      max-height: 54px;
       line-height: 1.35;
     }
 
@@ -2219,9 +2220,57 @@ space-id: 16658"></textarea>
 
     // Close dropdowns on outside click
     document.addEventListener("click", (e) => {
-      if (!e.target.closest(".smart-dropdown")) {
+      if (!e.target.closest(".smart-dropdown") && !e.target.closest(".dropdown-menu")) {
         document.querySelectorAll(".dropdown-menu").forEach(el => el.classList.remove("show"));
       }
+    });
+
+    function positionDropdown(btn, menu) {
+      if (!menu || !menu.classList.contains("show")) return;
+      const rect = btn.getBoundingClientRect();
+      const menuWidth = Math.min(380, window.innerWidth - 20);
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let left = rect.right - menuWidth;
+      if (left < 10) left = 10;
+      if (left + menuWidth > viewportWidth - 10) {
+        left = viewportWidth - menuWidth - 10;
+      }
+
+      const spaceBelow = viewportHeight - rect.bottom - 12;
+      const spaceAbove = rect.top - 12;
+      const preferredHeight = 300;
+
+      menu.style.position = "fixed";
+      menu.style.left = `${left}px`;
+      menu.style.width = `${menuWidth}px`;
+      menu.style.zIndex = "99999";
+
+      if (spaceBelow >= 160 || spaceBelow >= spaceAbove) {
+        menu.style.top = `${rect.bottom + 4}px`;
+        menu.style.bottom = "auto";
+        menu.style.maxHeight = `${Math.min(preferredHeight, Math.max(120, spaceBelow))}px`;
+      } else {
+        menu.style.bottom = `${viewportHeight - rect.top + 4}px`;
+        menu.style.top = "auto";
+        menu.style.maxHeight = `${Math.min(preferredHeight, Math.max(120, spaceAbove))}px`;
+      }
+    }
+
+    function openDropdown(btn, menu) {
+      const isAlreadyOpen = menu.classList.contains("show");
+      document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("show"));
+      if (!isAlreadyOpen) {
+        menu.classList.add("show");
+        positionDropdown(btn, menu);
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      if (urlDropdownMenu && urlDropdownMenu.classList.contains("show")) positionDropdown(btnUrlDropdown, urlDropdownMenu);
+      if (headersDropdownMenu && headersDropdownMenu.classList.contains("show")) positionDropdown(btnHeadersDropdown, headersDropdownMenu);
+      if (payloadDropdownMenu && payloadDropdownMenu.classList.contains("show")) positionDropdown(btnPayloadDropdown, payloadDropdownMenu);
     });
 
     // Theme Toggle
@@ -2327,9 +2376,7 @@ space-id: 16658"></textarea>
 
     btnUrlDropdown.addEventListener("click", (e) => {
       e.stopPropagation();
-      urlDropdownMenu.classList.toggle("show");
-      headersDropdownMenu.classList.remove("show");
-      payloadDropdownMenu.classList.remove("show");
+      openDropdown(btnUrlDropdown, urlDropdownMenu);
     });
 
     document.getElementById("btnClearUrlHistory").addEventListener("click", () => {
@@ -2379,6 +2426,7 @@ space-id: 16658"></textarea>
           if (e.target.closest(".btn-del")) return;
           const idx = parseInt(itemEl.dataset.idx);
           headersInput.value = state.headers[idx];
+          updateHeadersBadge();
           headersDropdownMenu.classList.remove("show");
           showToast("Loaded recent headers");
         });
@@ -2398,9 +2446,7 @@ space-id: 16658"></textarea>
 
     btnHeadersDropdown.addEventListener("click", (e) => {
       e.stopPropagation();
-      headersDropdownMenu.classList.toggle("show");
-      urlDropdownMenu.classList.remove("show");
-      payloadDropdownMenu.classList.remove("show");
+      openDropdown(btnHeadersDropdown, headersDropdownMenu);
     });
 
     document.getElementById("btnClearHeadersHistory").addEventListener("click", () => {
@@ -2469,9 +2515,7 @@ space-id: 16658"></textarea>
 
     btnPayloadDropdown.addEventListener("click", (e) => {
       e.stopPropagation();
-      payloadDropdownMenu.classList.toggle("show");
-      urlDropdownMenu.classList.remove("show");
-      headersDropdownMenu.classList.remove("show");
+      openDropdown(btnPayloadDropdown, payloadDropdownMenu);
     });
 
     document.getElementById("btnClearPayloadsHistory").addEventListener("click", () => {
@@ -2703,7 +2747,10 @@ space-id: 16658"></textarea>
             urlInput.value = item.url;
             updateUrlTitle();
           }
-          if (item.headers !== undefined) headersInput.value = item.headers;
+          if (item.headers !== undefined) {
+            headersInput.value = item.headers;
+            updateHeadersBadge();
+          }
           if (item.payload !== undefined) {
             payloadInput.value = item.payload;
             updatePayloadHighlight();
@@ -3523,13 +3570,15 @@ space-id: 16658"></textarea>
     let currentRequestTab = "payload";
 
     function updateHeadersBadge() {
-      if (!headersTabBadge || !headersInput) return;
-      const lines = headersInput.value.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      const badge = document.getElementById("headersTabBadge");
+      const input = document.getElementById("headers");
+      if (!badge || !input) return;
+      const lines = input.value.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       if (lines.length > 0) {
-        headersTabBadge.textContent = lines.length;
-        headersTabBadge.style.display = "inline-flex";
+        badge.textContent = lines.length;
+        badge.style.display = "inline-flex";
       } else {
-        headersTabBadge.style.display = "none";
+        badge.style.display = "none";
       }
     }
 
