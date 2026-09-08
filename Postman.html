@@ -632,6 +632,132 @@
       box-sizing: border-box;
     }
 
+    #payloadSection .payload-tree-wrapper {
+      flex: 1 1 auto;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      box-sizing: border-box;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      overflow-y: auto;
+      overflow-x: auto;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      color: #e2e8f0;
+    }
+
+    [data-theme="light"] #payloadSection .payload-tree-wrapper {
+      color: #1e293b;
+    }
+
+    .payload-tree-content {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .view-mode-pill-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 1.5px;
+      gap: 1.5px;
+    }
+
+    .view-mode-pill {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: calc(var(--radius-sm) - 2px);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      line-height: 1.35;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .view-mode-pill:hover {
+      color: var(--text-primary);
+      background: rgba(148, 163, 184, 0.12);
+    }
+
+    .view-mode-pill.active {
+      background: var(--accent-primary);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .payload-tree-actions-float {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: flex;
+      gap: 4px;
+      z-index: 5;
+    }
+
+    .btn-tree-float {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-tree-float:hover {
+      background: var(--bg-hover);
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    [data-theme="light"] .btn-tree-float {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #334155;
+    }
+
+    [data-theme="light"] .btn-tree-float:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .payload-tree-empty,
+    .payload-tree-invalid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 140px;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      padding: 20px;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
     #headersSection textarea.code-editor {
       width: 100%;
       height: 100%;
@@ -1936,7 +2062,22 @@
 
             <!-- Tab Contextual Actions for Payload -->
             <div class="request-tab-actions" id="tabActionsPayload">
-              <button type="button" class="btn-beautify" id="btnBeautifyPayload" title="Beautify / Format JSON Payload (Alt+F)">
+              <div class="view-mode-pill-group" id="payloadViewModeToggle"
+                title="Switch between Collapsible Tree View and Raw Code Editor">
+                <button type="button" class="view-mode-pill active" id="btnPayloadModeTree"
+                  title="Collapsible Tree View">
+                  🌲 Tree
+                </button>
+                <button type="button" class="view-mode-pill" id="btnPayloadModeRaw" title="Raw Code Editor (Alt+E)">
+                  📝 Raw
+                </button>
+              </div>
+              <button type="button" class="btn-res-action btn-toggle-collapse" id="btnToggleCollapsePayload"
+                title="Toggle Expand / Collapse JSON objects">
+                ▶ Collapse
+              </button>
+              <button type="button" class="btn-beautify" id="btnBeautifyPayload"
+                title="Beautify / Format JSON Payload (Alt+F)">
                 ✨ Beautify
               </button>
               <!-- Recent Payloads Dropdown -->
@@ -1976,9 +2117,25 @@
 
           <!-- Tab Pane: JSON Payload -->
           <div class="request-tab-pane active" id="payloadSection">
-            <div class="code-editor-wrapper" id="payloadEditorWrapper">
+            <!-- Collapsible JSON Tree View -->
+            <div class="payload-tree-wrapper" id="payloadTreeWrapper">
+              <div class="payload-tree-actions-float">
+                <button type="button" class="btn-tree-float" id="btnQuickCopyPayload" title="Copy payload JSON">
+                  📋 Copy
+                </button>
+                <button type="button" class="btn-tree-float" id="btnQuickEditPayload"
+                  title="Edit JSON in Code Editor (Alt+E)">
+                  ✏️ Edit
+                </button>
+              </div>
+              <div class="payload-tree-content json-tree" id="payloadTree"></div>
+            </div>
+
+            <!-- Raw Code Editor -->
+            <div class="code-editor-wrapper" id="payloadEditorWrapper" style="display: none;">
               <pre class="code-editor-highlight" id="payloadHighlight" aria-hidden="true"></pre>
-              <textarea id="payload" class="code-editor-input" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder='{
+              <textarea id="payload" class="code-editor-input" spellcheck="false" autocomplete="off"
+                autocapitalize="off" placeholder='{
   "name": "John",
   "email": "john@example.com"
 }'></textarea>
@@ -2190,6 +2347,11 @@ space-id: 16658"></textarea>
     const payloadInput = document.getElementById("payload");
     const headersInput = document.getElementById("headers");
     const payloadSection = document.getElementById("payloadSection");
+    const payloadTreeWrapper = document.getElementById("payloadTreeWrapper");
+    const payloadTree = document.getElementById("payloadTree");
+    const btnPayloadModeTree = document.getElementById("btnPayloadModeTree");
+    const btnPayloadModeRaw = document.getElementById("btnPayloadModeRaw");
+    const btnToggleCollapsePayload = document.getElementById("btnToggleCollapsePayload");
     const responseElement = document.getElementById("response");
     const submitBtn = document.getElementById("submitBtn");
     const btnSaveReq = document.getElementById("btnSaveReq");
@@ -2496,6 +2658,9 @@ space-id: 16658"></textarea>
           const idx = parseInt(itemEl.dataset.idx);
           payloadInput.value = state.payloads[idx];
           updatePayloadHighlight();
+          if (typeof renderPayloadTree === "function") {
+            renderPayloadTree();
+          }
           payloadDropdownMenu.classList.remove("show");
           showToast("Loaded recent payload");
         });
@@ -2580,7 +2745,12 @@ space-id: 16658"></textarea>
     }
 
     if (payloadInput && payloadHighlight) {
-      payloadInput.addEventListener("input", updatePayloadHighlight);
+      payloadInput.addEventListener("input", () => {
+        updatePayloadHighlight();
+        if (typeof renderPayloadTree === "function" && typeof currentPayloadMode !== "undefined" && currentPayloadMode === "tree") {
+          renderPayloadTree();
+        }
+      });
       payloadInput.addEventListener("scroll", () => {
         payloadHighlight.scrollTop = payloadInput.scrollTop;
         payloadHighlight.scrollLeft = payloadInput.scrollLeft;
@@ -2640,6 +2810,9 @@ space-id: 16658"></textarea>
       if (result.success) {
         payloadInput.value = result.formatted;
         updatePayloadHighlight();
+        if (typeof renderPayloadTree === "function") {
+          renderPayloadTree();
+        }
         showToast("✨ JSON payload beautified!");
       } else {
         showToast(`⚠️ Invalid JSON: ${result.error}`);
@@ -2754,6 +2927,9 @@ space-id: 16658"></textarea>
           if (item.payload !== undefined) {
             payloadInput.value = item.payload;
             updatePayloadHighlight();
+            if (typeof renderPayloadTree === "function") {
+              renderPayloadTree();
+            }
           }
           showToast(`Restored: ${item.method} ${item.url}`);
         });
@@ -2898,6 +3074,9 @@ space-id: 16658"></textarea>
       headersInput.value = "";
       payloadInput.value = "";
       updatePayloadHighlight();
+      if (typeof renderPayloadTree === "function") {
+        renderPayloadTree();
+      }
       setActiveRequestTab("headers");
       updateHeadersBadge();
 
@@ -3148,6 +3327,252 @@ space-id: 16658"></textarea>
           `</span>`;
       }
       return escapeHtml(String(data));
+    }
+
+    // =========================================================================
+    // PAYLOAD TREE & COLLAPSIBLE VIEW LOGIC
+    // =========================================================================
+
+    let currentPayloadMode = "tree";
+
+    function updatePayloadCollapseButtonState() {
+      if (!btnToggleCollapsePayload || !payloadTree) return;
+      const collapsedNodes = payloadTree.querySelectorAll(".json-node.collapsed");
+      if (collapsedNodes.length > 0) {
+        btnToggleCollapsePayload.innerHTML = '▼ Expand';
+      } else {
+        btnToggleCollapsePayload.innerHTML = '▶ Collapse';
+      }
+    }
+
+    function renderPayloadTree() {
+      if (!payloadTree) return true;
+      const text = (payloadInput ? payloadInput.value : "").trim();
+
+      if (!text) {
+        payloadTree.innerHTML = `
+          <div class="payload-tree-empty">
+            <span style="font-size: 22px; margin-bottom: 6px;">📦</span>
+            <span style="font-weight: 600; font-size: 12px; color: var(--text-primary);">No JSON payload defined</span>
+            <span style="color: var(--text-muted); font-size: 10.5px; margin-top: 2px;">Enter a payload in the code editor to view collapsible tree</span>
+            <button type="button" class="btn-sm" id="btnTreeEmptyEdit" style="margin-top: 10px; padding: 4px 10px;">✏️ Open Code Editor</button>
+          </div>`;
+        const btn = document.getElementById("btnTreeEmptyEdit");
+        if (btn) btn.addEventListener("click", () => {
+          setPayloadMode("raw");
+          if (payloadInput) payloadInput.focus();
+        });
+        if (btnToggleCollapsePayload) btnToggleCollapsePayload.innerHTML = '▶ Collapse';
+        return true;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (err) {
+        const relaxed = beautifyJsonText(text);
+        if (relaxed.success) {
+          try {
+            parsed = JSON.parse(relaxed.formatted);
+          } catch (e2) {
+            parsed = null;
+          }
+        }
+      }
+
+      if (parsed === undefined || (parsed === null && text !== "null")) {
+        payloadTree.innerHTML = `
+          <div class="payload-tree-invalid">
+            <div style="font-weight: 600; margin-bottom: 4px; color: #ef4444; font-size: 12px;">⚠️ Invalid JSON Syntax</div>
+            <div style="color: var(--text-muted); font-size: 10.5px; max-width: 320px; margin-bottom: 10px;">The payload contains syntax errors. Fix them in the editor to view the collapsible tree.</div>
+            <button type="button" class="btn-sm" id="btnTreeInvalidEdit" style="padding: 4px 10px;">✏️ Fix in Code Editor</button>
+          </div>`;
+        const btn = document.getElementById("btnTreeInvalidEdit");
+        if (btn) btn.addEventListener("click", () => {
+          setPayloadMode("raw");
+          if (payloadInput) payloadInput.focus();
+        });
+        return false;
+      }
+
+      payloadTree.innerHTML = buildJsonTreeHtml(parsed);
+      updatePayloadCollapseButtonState();
+      return true;
+    }
+
+    function setPayloadMode(mode, save = true) {
+      const isTree = mode === "tree";
+
+      if (isTree) {
+        const ok = renderPayloadTree();
+        if (!ok) {
+          showToast("⚠️ Invalid JSON: Fix syntax in Raw mode");
+          return false;
+        }
+      }
+
+      currentPayloadMode = mode;
+      if (save) {
+        try { localStorage.setItem("pm_payload_mode", mode); } catch (e) { }
+      }
+
+      if (payloadTreeWrapper) {
+        payloadTreeWrapper.style.display = isTree ? "flex" : "none";
+      }
+      if (payloadEditorWrapper) {
+        payloadEditorWrapper.style.display = isTree ? "none" : "flex";
+      }
+
+      if (btnPayloadModeTree) btnPayloadModeTree.classList.toggle("active", isTree);
+      if (btnPayloadModeRaw) btnPayloadModeRaw.classList.toggle("active", !isTree);
+
+      if (isTree) {
+        updatePayloadCollapseButtonState();
+      } else if (payloadInput) {
+        updatePayloadHighlight();
+      }
+
+      return true;
+    }
+
+    function togglePayloadCollapse() {
+      if (!payloadTree) return;
+
+      // If in raw mode, switch to tree first
+      if (currentPayloadMode !== "tree") {
+        const ok = setPayloadMode("tree");
+        if (!ok) return;
+      }
+
+      const rootNode = payloadTree.querySelector(".json-node");
+      if (!rootNode) return;
+      const allNodes = payloadTree.querySelectorAll(".json-node");
+      const collapsedNodes = payloadTree.querySelectorAll(".json-node.collapsed");
+
+      if (collapsedNodes.length > 0) {
+        collapsedNodes.forEach(node => node.classList.remove("collapsed"));
+        if (btnToggleCollapsePayload) btnToggleCollapsePayload.innerHTML = '▶ Collapse';
+        showToast("Expanded all payload nodes");
+      } else {
+        allNodes.forEach(node => {
+          if (node === rootNode) {
+            node.classList.remove("collapsed");
+          } else {
+            node.classList.add("collapsed");
+          }
+        });
+        if (btnToggleCollapsePayload) btnToggleCollapsePayload.innerHTML = '▼ Expand';
+        showToast("Collapsed all nested payload objects");
+      }
+    }
+
+    if (btnToggleCollapsePayload) {
+      btnToggleCollapsePayload.addEventListener("click", togglePayloadCollapse);
+    }
+
+    if (btnPayloadModeTree) {
+      btnPayloadModeTree.addEventListener("click", () => setPayloadMode("tree"));
+    }
+    if (btnPayloadModeRaw) {
+      btnPayloadModeRaw.addEventListener("click", () => {
+        setPayloadMode("raw");
+        if (payloadInput) payloadInput.focus();
+      });
+    }
+
+    if (payloadTreeWrapper) {
+      // Interactive Collapsing, Copy & Actions on Click
+      payloadTreeWrapper.addEventListener("click", (e) => {
+        // Quick Copy
+        if (e.target.closest("#btnQuickCopyPayload")) {
+          e.stopPropagation();
+          const text = payloadInput ? payloadInput.value : "";
+          if (!text) return;
+          navigator.clipboard.writeText(text).then(() => {
+            showToast("📋 Payload copied!");
+          });
+          return;
+        }
+
+        // Quick Edit
+        if (e.target.closest("#btnQuickEditPayload")) {
+          e.stopPropagation();
+          setPayloadMode("raw");
+          if (payloadInput) payloadInput.focus();
+          return;
+        }
+
+        // JSON Node Toggle (chevron)
+        const toggle = e.target.closest(".json-toggle");
+        if (toggle) {
+          e.stopPropagation();
+          const node = toggle.closest(".json-node");
+          if (node) {
+            if (e.altKey) {
+              const isCurrentlyCollapsed = node.classList.contains("collapsed");
+              toggleNode(node, !isCurrentlyCollapsed, true);
+            } else {
+              node.classList.toggle("collapsed");
+            }
+            updatePayloadCollapseButtonState();
+          }
+          return;
+        }
+
+        // JSON Ellipsis Pill
+        const ellipsis = e.target.closest(".json-ellipsis");
+        if (ellipsis) {
+          e.stopPropagation();
+          const node = ellipsis.closest(".json-node");
+          if (node) {
+            if (e.altKey) {
+              toggleNode(node, false, true);
+            } else {
+              node.classList.remove("collapsed");
+            }
+            updatePayloadCollapseButtonState();
+          }
+          return;
+        }
+
+        // JSON Bracket
+        const bracket = e.target.closest(".hl-bracket");
+        if (bracket) {
+          e.stopPropagation();
+          const node = bracket.closest(".json-node");
+          if (node) {
+            if (e.altKey) {
+              const isCurrentlyCollapsed = node.classList.contains("collapsed");
+              toggleNode(node, !isCurrentlyCollapsed, true);
+            } else {
+              node.classList.toggle("collapsed");
+            }
+            updatePayloadCollapseButtonState();
+          }
+          return;
+        }
+      });
+
+      payloadTreeWrapper.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          const toggle = e.target.closest(".json-toggle");
+          if (toggle) {
+            e.preventDefault();
+            const node = toggle.closest(".json-node");
+            if (node) {
+              node.classList.toggle("collapsed");
+              updatePayloadCollapseButtonState();
+            }
+          }
+        }
+      });
+
+      payloadTreeWrapper.addEventListener("dblclick", (e) => {
+        if (e.target.closest(".json-toggle, .json-ellipsis, .hl-bracket, .btn-tree-float, .btn-sm")) return;
+        setPayloadMode("raw");
+        if (payloadInput) payloadInput.focus();
+        showToast("✏️ Switched to Code Editor");
+      });
     }
 
     // =========================================================================
@@ -3610,6 +4035,10 @@ space-id: 16658"></textarea>
         wrapper.style.height = "";
         wrapper.style.flex = "";
       }
+      if (payloadTreeWrapper) {
+        payloadTreeWrapper.style.height = "";
+        payloadTreeWrapper.style.flex = "";
+      }
       if (payloadInput) {
         payloadInput.style.height = "";
         payloadInput.style.flex = "";
@@ -3622,8 +4051,13 @@ space-id: 16658"></textarea>
       if (tabActionsPayload) tabActionsPayload.style.display = isPayload ? "flex" : "none";
       if (tabActionsHeaders) tabActionsHeaders.style.display = !isPayload ? "flex" : "none";
 
-      if (isPayload && typeof updatePayloadHighlight === "function") {
-        updatePayloadHighlight();
+      if (isPayload) {
+        if (typeof updatePayloadHighlight === "function") {
+          updatePayloadHighlight();
+        }
+        if (typeof renderPayloadTree === "function" && typeof currentPayloadMode !== "undefined" && currentPayloadMode === "tree") {
+          renderPayloadTree();
+        }
       }
     }
 
@@ -3936,6 +4370,9 @@ space-id: 16658"></textarea>
       headersInput.value = parsed.headers || "";
       payloadInput.value = parsed.payload || "";
       updatePayloadHighlight();
+      if (typeof renderPayloadTree === "function") {
+        renderPayloadTree();
+      }
 
       if (parsed.method === "GET") {
         setActiveRequestTab("headers");
@@ -4077,6 +4514,13 @@ space-id: 16658"></textarea>
         e.preventDefault();
         beautifyPayload();
       }
+      if (e.altKey && (e.key === "e" || e.key === "E")) {
+        e.preventDefault();
+        const nextMode = currentPayloadMode === "tree" ? "raw" : "tree";
+        setPayloadMode(nextMode);
+        if (nextMode === "raw" && payloadInput) payloadInput.focus();
+        showToast(nextMode === "tree" ? "🌲 Switched to Tree View" : "📝 Switched to Code Editor");
+      }
     });
 
     // Initialize views
@@ -4088,6 +4532,15 @@ space-id: 16658"></textarea>
     renderHistoryList();
     updatePayloadHighlight();
     updateHeadersBadge();
+
+    // Initialize payload view mode preference
+    let savedPayloadMode = "";
+    try {
+      savedPayloadMode = localStorage.getItem("pm_payload_mode");
+    } catch (e) { }
+    const hasInitialPayload = payloadInput && payloadInput.value.trim().length > 0;
+    const initialPayloadMode = savedPayloadMode || (hasInitialPayload ? "tree" : "raw");
+    setPayloadMode(initialPayloadMode, false);
 
   </script>
 </body>
